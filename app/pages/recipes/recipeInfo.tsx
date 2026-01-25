@@ -4,7 +4,7 @@ import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { Text } from "@/components/Themed";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { t } from "i18next";
 import React, { useMemo } from "react";
 import { Pressable, StyleSheet } from "react-native";
@@ -18,6 +18,7 @@ export default function RecipeInfo() {
     instructions?: string;
     photoUri?: string;
   }>();
+  const router = useRouter();
 
   const initialIngredients = useMemo(() => {
     try {
@@ -57,6 +58,7 @@ export default function RecipeInfo() {
           title: "",
           headerShown: true,
           headerTransparent: true,
+          headerShadowVisible: false,
 
           headerLeft: () => (
             <Pressable
