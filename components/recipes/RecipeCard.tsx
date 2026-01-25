@@ -1,4 +1,6 @@
 import { Text, View } from "@/components/Themed";
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { router } from "expo-router";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
@@ -22,6 +24,8 @@ export function RecipeCard({
   photoUri,
 }: Props) {
   const [expanded] = useState(false);
+  const scheme = useColorScheme() ?? "light";
+  const c = Colors[scheme];
 
   const visibleIngredients = useMemo(() => {
     if (expanded) return ingredients;
@@ -30,7 +34,7 @@ export function RecipeCard({
 
   return (
     <TouchableOpacity
-      style={styles.card}
+      style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}
       onPress={() =>
         router.push({
           pathname: "/pages/recipes/recipeInfo",
@@ -69,7 +73,13 @@ export function RecipeCard({
         </Text>
         <View style={styles.chipsWrap}>
           {visibleIngredients.map((item, idx) => (
-            <View key={`${item}-${idx}`} style={styles.chip}>
+            <View
+              key={`${item}-${idx}`}
+              style={[
+                styles.chip,
+                { backgroundColor: c.secondary, borderColor: c.border },
+              ]}
+            >
               <Text style={styles.chipText}>{item}</Text>
             </View>
           ))}
@@ -86,8 +96,6 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 14,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#fff",
   },
   header: { marginBottom: 10, backgroundColor: "transparent" },
   title: { fontSize: 16, fontWeight: "700" },

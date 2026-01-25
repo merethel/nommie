@@ -4,10 +4,10 @@ const tintColorDark = "#F6C453";
 export default {
   light: {
     text: "#1F2937", // dark neutral text
-    background: "#FFF6E5", // warm cream background
+    background: "#fbeaccff", // warm cream background
     tint: tintColorLight,
 
-    card: "#FFFFFF",
+    card: "#fff8ecff",
     border: "#F1E3C8",
 
     primary: "#F4A938", // buttons / highlights
