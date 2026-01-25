@@ -3,18 +3,21 @@ import { StyleSheet } from "react-native";
 import StyledButton from "@/components/StyledButton";
 import { Text, View } from "@/components/Themed";
 import { router } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 export default function TabOneScreen() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Forside</Text>
+      <Text style={styles.title}>{t("tabs.home")}</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
       <StyledButton
-        title="Opret opskrift"
+        title={t("createRecipe.screenTitle")}
         onPress={() => router.push("../pages/recipes/createRecipe")}
       />
     </View>

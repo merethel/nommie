@@ -29,6 +29,10 @@ const resources = {
         recipes: "Recipes",
         settings: "Settings",
       },
+      notFound: {
+        title: "This screen doesn't exist.",
+        link: "Go to home screen!",
+      },
     },
   },
   da: {
@@ -56,6 +60,10 @@ const resources = {
         home: "Hjem",
         recipes: "Opskrifter",
         settings: "Indstillinger",
+      },
+      notFound: {
+        title: "Denne skærm findes ikke.",
+        link: "Gå til startsiden!",
       },
     },
   },
