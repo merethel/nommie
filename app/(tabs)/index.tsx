@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 
-import StyledButton from "@/components/StyledButton";
+import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 export default function TabOneScreen() {
@@ -10,6 +10,7 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
+      <Stack.Screen options={{ title: t("tabs.home") }} />
       <Text style={styles.title}>{t("tabs.home")}</Text>
       <View
         style={styles.separator}

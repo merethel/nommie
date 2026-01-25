@@ -3,7 +3,7 @@ import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, TextInput } from "react-native";
 
-import StyledButton from "@/components/StyledButton";
+import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import { t } from "i18next";
 

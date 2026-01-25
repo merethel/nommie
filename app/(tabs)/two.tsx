@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "expo-router";
+import { Stack, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 
@@ -36,6 +36,7 @@ export default function TabTwoScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <Stack.Screen options={{ title: t("tabs.recipes") }} />
       <Text style={styles.title}>{t("recipes.title")}</Text>
 
       {recipes.length === 0 ? (

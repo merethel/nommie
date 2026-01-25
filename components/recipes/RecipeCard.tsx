@@ -2,7 +2,7 @@ import { Text, View } from "@/components/Themed";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
-import StyledButton from "../StyledButton";
+import StyledButton from "../common/StyledButton";
 
 type Props = {
   title: string;
