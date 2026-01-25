@@ -20,13 +20,17 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerTitle: " ",
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        headerTransparent: true,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: t("tabs.home"),
+          title: " ",
+          headerTitle: " ",
+          headerTransparent: true,
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>

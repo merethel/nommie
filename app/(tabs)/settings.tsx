@@ -1,3 +1,4 @@
+import ScreenContainer from "@/components/common/ScreenConatiner";
 import { Text, View } from "@/components/Themed";
 import { useLanguage } from "@/src/i18n/LanguageProvider";
 import { Stack } from "expo-router";
@@ -9,7 +10,7 @@ export default function SettingsScreen() {
   const { language, setLanguage } = useLanguage();
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer>
       <Stack.Screen options={{ title: t("settings.screenTitle") }} />
 
       <Text style={styles.header}>{t("settings.language")}</Text>
@@ -26,7 +27,7 @@ export default function SettingsScreen() {
           onPress={() => setLanguage("da")}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

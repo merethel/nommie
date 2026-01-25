@@ -54,7 +54,6 @@ export default function RecipeInfo() {
         options={{
           title: "",
           headerShown: true,
-          headerBackground: () => null,
           headerBackButtonDisplayMode: "minimal",
           headerTintColor: "#000",
           headerTransparent: true,
