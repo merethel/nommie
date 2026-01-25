@@ -17,6 +17,12 @@ const resources = {
         instructionsPlaceholder: "How to make it?",
         save: "Save",
         cancel: "Cancel",
+        validation: {
+          titleRequired: "Title is required",
+          descriptionRequired: "Description is required",
+          ingredientsRequired: "At least one ingredient is required",
+          instructionsRequired: "Instructions are required",
+        },
       },
       settings: {
         screenTitle: "Settings",
@@ -36,10 +42,17 @@ const resources = {
       recipes: {
         empty: "No recipes saved yet.",
         title: "Recipes",
+        description: "A collection of your favorite recipes.",
+        ingredients: "Ingredients list",
+        instructions: "Cooking instructions",
       },
       common: {
         showMore: "Show more",
         showLess: "Show less",
+        edit: "Edit",
+        delete: "Delete",
+        cancel: "Cancel",
+        save: "Save",
       },
     },
   },
@@ -57,6 +70,12 @@ const resources = {
         instructionsPlaceholder: "Hvordan laves retten?",
         save: "Gem",
         cancel: "Annuller",
+        validation: {
+          titleRequired: "Titel er påkrævet",
+          descriptionRequired: "Beskrivelse er påkrævet",
+          ingredientsRequired: "Mindst én ingrediens er påkrævet",
+          instructionsRequired: "Fremgangsmåde er påkrævet",
+        },
       },
       settings: {
         screenTitle: "Indstillinger",
@@ -76,10 +95,17 @@ const resources = {
       recipes: {
         empty: "Ingen opskrifter gemt endnu.",
         title: "Opskrifter",
+        description: "En samling af dine yndlingsopskrifter.",
+        ingredients: "Ingrediensliste",
+        instructions: "Fremgangsmåde",
       },
       common: {
         showMore: "Vis mere",
         showLess: "Vis mindre",
+        edit: "Rediger",
+        delete: "Slet",
+        cancel: "Annuller",
+        save: "Gem",
       },
     },
   },

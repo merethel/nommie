@@ -1,10 +1,11 @@
 import { Text, View } from "@/components/Themed";
+import { router } from "expo-router";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
-import { StyleSheet } from "react-native";
-import StyledButton from "../common/StyledButton";
+import { StyleSheet, TouchableOpacity } from "react-native";
 
 type Props = {
+  id: string;
   title: string;
   description?: string;
   ingredients: string[];
@@ -12,23 +13,35 @@ type Props = {
 };
 
 export function RecipeCard({
+  id,
   title,
   description,
   ingredients,
   instructions,
 }: Props) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded] = useState(false);
 
   const visibleIngredients = useMemo(() => {
     if (expanded) return ingredients;
-    return ingredients.slice(0, 6); // show a few when collapsed
+    return ingredients.slice(0, 6);
   }, [expanded, ingredients]);
 
-  const hasMoreIngredients = ingredients.length > visibleIngredients.length;
-
   return (
-    <View style={styles.card}>
-      {/* Header */}
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        router.push({
+          pathname: "/pages/recipes/recipeInfo",
+          params: {
+            id,
+            title,
+            description: description ?? "",
+            ingredients: JSON.stringify(ingredients),
+            instructions,
+          },
+        })
+      }
+    >
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
         {!!description?.trim() && (
@@ -36,7 +49,6 @@ export function RecipeCard({
         )}
       </View>
 
-      {/* Ingredients */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
           {t("createRecipe.ingredientsLabel")}
@@ -47,33 +59,9 @@ export function RecipeCard({
               <Text style={styles.chipText}>{item}</Text>
             </View>
           ))}
-
-          {!expanded && hasMoreIngredients && (
-            <View style={[styles.chip, styles.moreChip]}>
-              <Text style={styles.chipText}>
-                +{ingredients.length - visibleIngredients.length}
-              </Text>
-            </View>
-          )}
         </View>
       </View>
-
-      {/* Instructions */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t("createRecipe.instructionsLabel")}
-        </Text>
-        <Text style={styles.instructions} numberOfLines={expanded ? 0 : 3}>
-          {instructions}
-        </Text>
-      </View>
-
-      {/* Footer actions */}
-      <StyledButton
-        title={expanded ? t("common.showLess") : t("common.showMore")}
-        onPress={() => setExpanded((v) => !v)}
-      />
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -87,22 +75,10 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     backgroundColor: "#fff",
   },
-  header: {
-    marginBottom: 10,
-    backgroundColor: "transparent",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  description: {
-    marginTop: 4,
-    opacity: 0.75,
-  },
-  section: {
-    marginTop: 10,
-    backgroundColor: "transparent",
-  },
+  header: { marginBottom: 10, backgroundColor: "transparent" },
+  title: { fontSize: 16, fontWeight: "700" },
+  description: { marginTop: 4, opacity: 0.75 },
+  section: { marginTop: 10, backgroundColor: "transparent" },
   sectionTitle: {
     fontSize: 13,
     fontWeight: "600",
@@ -123,15 +99,5 @@ const styles = StyleSheet.create({
     borderColor: "#e5e7eb",
     backgroundColor: "#f9fafb",
   },
-  moreChip: {
-    backgroundColor: "#eef2ff",
-    borderColor: "#e0e7ff",
-  },
-  chipText: {
-    fontSize: 12,
-  },
-  instructions: {
-    opacity: 0.9,
-    lineHeight: 18,
-  },
+  chipText: { fontSize: 12 },
 });
