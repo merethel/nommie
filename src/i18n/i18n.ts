@@ -33,6 +33,10 @@ const resources = {
         title: "This screen doesn't exist.",
         link: "Go to home screen!",
       },
+      recipes: {
+        empty: "No recipes saved yet.",
+        title: "Recipes",
+      },
     },
   },
   da: {
@@ -64,6 +68,10 @@ const resources = {
       notFound: {
         title: "Denne skærm findes ikke.",
         link: "Gå til startsiden!",
+      },
+      recipes: {
+        empty: "Ingen opskrifter gemt endnu.",
+        title: "Opskrifter",
       },
     },
   },
