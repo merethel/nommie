@@ -24,6 +24,7 @@ const resources = {
           instructionsRequired: "Instructions are required",
         },
         addPhoto: "Add photo",
+        photoLabel: "Photo",
       },
       settings: {
         screenTitle: "Settings",
@@ -78,6 +79,7 @@ const resources = {
           instructionsRequired: "Fremgangsmåde er påkrævet",
         },
         addPhoto: "Tilføj foto",
+        photoLabel: "Foto",
       },
       settings: {
         screenTitle: "Indstillinger",

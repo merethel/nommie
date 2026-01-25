@@ -5,13 +5,15 @@ import { useState } from "react";
 import {
   Image,
   Pressable,
-  ScrollView,
   StyleSheet,
   TextInput,
+  useColorScheme,
 } from "react-native";
 
+import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import { t } from "i18next";
 
 const RECIPES_KEY = "nommie_recipes";
@@ -36,6 +38,8 @@ function parseIngredients(input: string): string[] {
 
 export default function CreateRecipeScreen() {
   const router = useRouter();
+  const scheme = useColorScheme() ?? "light";
+  const c = Colors[scheme];
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -83,7 +87,7 @@ export default function CreateRecipeScreen() {
     <>
       <Stack.Screen options={{ title: t("createRecipe.screenTitle") }} />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollViewContainer>
         <Text style={styles.label}>{t("createRecipe.photoLabel")}</Text>
 
         <Pressable style={styles.imagePicker} onPress={pickImage}>
@@ -98,7 +102,10 @@ export default function CreateRecipeScreen() {
 
         <Text style={styles.label}>{t("createRecipe.titleLabel")}</Text>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: c.border, backgroundColor: c.card },
+          ]}
           value={title}
           onChangeText={setTitle}
           placeholder={t("createRecipe.titlePlaceholder")}
@@ -106,7 +113,10 @@ export default function CreateRecipeScreen() {
 
         <Text style={styles.label}>{t("createRecipe.descriptionLabel")}</Text>
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: c.border, backgroundColor: c.card },
+          ]}
           value={description}
           onChangeText={setDescription}
           placeholder={t("createRecipe.descriptionPlaceholder")}
@@ -114,7 +124,11 @@ export default function CreateRecipeScreen() {
 
         <Text style={styles.label}>{t("createRecipe.ingredientsLabel")}</Text>
         <TextInput
-          style={[styles.input, styles.multiline]}
+          style={[
+            styles.input,
+            styles.multiline,
+            { borderColor: c.border, backgroundColor: c.card },
+          ]}
           value={ingredients}
           onChangeText={setIngredients}
           placeholder={t("createRecipe.ingredientsPlaceholder")}
@@ -123,7 +137,11 @@ export default function CreateRecipeScreen() {
 
         <Text style={styles.label}>{t("createRecipe.instructionsLabel")}</Text>
         <TextInput
-          style={[styles.input, styles.multiline]}
+          style={[
+            styles.input,
+            styles.multiline,
+            { borderColor: c.border, backgroundColor: c.card },
+          ]}
           value={instructions}
           onChangeText={setInstructions}
           placeholder={t("createRecipe.instructionsPlaceholder")}
@@ -137,21 +155,18 @@ export default function CreateRecipeScreen() {
             onPress={() => router.back()}
           />
         </View>
-      </ScrollView>
+      </ScrollViewContainer>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
   label: { fontSize: 14, marginBottom: 4, fontWeight: "600" },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
     marginBottom: 16,
-    backgroundColor: "#fff",
   },
   multiline: { minHeight: 80, textAlignVertical: "top" },
   buttons: { gap: 12, marginTop: 8 },

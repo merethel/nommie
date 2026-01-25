@@ -8,6 +8,7 @@ export default {
     tint: tintColorLight,
 
     card: "#fff8ecff",
+    cardLight: "#fefaf2ff",
     border: "#F1E3C8",
 
     primary: "#F4A938", // buttons / highlights
@@ -23,6 +24,7 @@ export default {
     tint: tintColorDark,
 
     card: "#2A241C",
+    cardLight: "#3A3126",
     border: "#3A3126",
 
     primary: "#F6C453",

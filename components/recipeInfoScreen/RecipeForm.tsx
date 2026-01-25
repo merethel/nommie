@@ -113,7 +113,11 @@ export default function RecipeForm({
             style={[
               styles.input,
               styles.multiline,
-              { backgroundColor: c.card, borderColor: c.border, color: c.text },
+              {
+                backgroundColor: c.cardLight,
+                borderColor: c.border,
+                color: c.text,
+              },
             ]}
             value={ingredientsText}
             onChangeText={setIngredientsText}
@@ -157,7 +161,11 @@ export default function RecipeForm({
               styles.input,
               styles.multiline,
               { minHeight: 140 },
-              { backgroundColor: c.card, borderColor: c.border, color: c.text },
+              {
+                backgroundColor: c.cardLight,
+                borderColor: c.border,
+                color: c.text,
+              },
             ]}
             value={instructions}
             onChangeText={setInstructions}
