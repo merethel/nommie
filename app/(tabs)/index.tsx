@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 
+import ScreenContainer from "@/components/common/ScreenConatiner";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import { router, Stack } from "expo-router";
@@ -9,7 +10,7 @@ export default function TabOneScreen() {
   const { t } = useTranslation();
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer>
       <Stack.Screen options={{ title: t("tabs.home") }} />
       <Text style={styles.title}>{t("tabs.home")}</Text>
       <View
@@ -23,7 +24,7 @@ export default function TabOneScreen() {
           onPress={() => router.push("../pages/recipes/createRecipe")}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 
