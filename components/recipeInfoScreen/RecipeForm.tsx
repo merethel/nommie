@@ -233,13 +233,21 @@ const styles = StyleSheet.create({
 
   titleRow: {
     flexDirection: "row",
+    width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
   },
+
   heartBtn: { padding: 6 },
 
-  bigTitle: { fontSize: 24, fontWeight: "800" },
+  bigTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    flex: 1,
+    minWidth: 0,
+  },
+
   bodyText: { fontSize: 14, opacity: 0.9 },
 
   card: {
