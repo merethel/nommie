@@ -12,13 +12,13 @@ export type Recipe = {
   title: string;
   description?: string;
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   tags: string[];
   createdAt?: number;
   photoUri?: string;
 };
 
-export function parseIngredients(input: string): string[] {
+export function parseToList(input: string): string[] {
   return input
     .split(/\n|,/g)
     .map((s: string) => s.trim())
@@ -31,7 +31,7 @@ export type RecipeInitial = {
   description: string;
   tags: string[];
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   photoUri: string;
 };
 
@@ -44,7 +44,9 @@ export function useRecipeEditor(initial: RecipeInitial) {
   const [ingredientsText, setIngredientsText] = useState(
     initial.ingredients.join(", "),
   );
-  const [instructions, setInstructions] = useState(initial.instructions);
+  const [instructionsText, setInstructionsText] = useState(
+    initial.instructions.join("\n"),
+  );
   const [photoUri, setPhotoUri] = useState(initial.photoUri);
 
   function reset() {
@@ -52,7 +54,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
     setDescription(initial.description);
     setTagsText(initial.tags.join(", "));
     setIngredientsText(initial.ingredients.join(", "));
-    setInstructions(initial.instructions);
+    setInstructionsText(initial.instructions.join("\n"));
     setPhotoUri(initial.photoUri);
     setIsEditing(false);
   }
@@ -61,9 +63,9 @@ export function useRecipeEditor(initial: RecipeInitial) {
     const updated: Partial<Recipe> = {
       title: title.trim(),
       description: description.trim(),
-      tags: parseIngredients(tagsText),
-      ingredients: parseIngredients(ingredientsText),
-      instructions: instructions.trim(),
+      tags: parseToList(tagsText),
+      ingredients: parseToList(ingredientsText),
+      instructions: parseToList(instructionsText),
       photoUri:
         photoUri ||
         "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
@@ -99,7 +101,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
         description: updated.description ?? "",
         tags: JSON.stringify(updated.tags ?? []),
         ingredients: JSON.stringify(updated.ingredients ?? []),
-        instructions: updated.instructions ?? "",
+        instructions: JSON.stringify(updated.instructions ?? []),
         photoUri: updated.photoUri ?? "",
       });
     } catch (e) {
@@ -156,8 +158,8 @@ export function useRecipeEditor(initial: RecipeInitial) {
     setTagsText,
     ingredientsText,
     setIngredientsText,
-    instructions,
-    setInstructions,
+    instructionsText,
+    setInstructionsText,
     photoUri,
     setPhotoUri,
 

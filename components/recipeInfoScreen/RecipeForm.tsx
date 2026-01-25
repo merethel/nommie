@@ -3,7 +3,7 @@ import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
-import { parseIngredients } from "@/utils/hooks/useRecipeEditor";
+import { parseToList } from "@/utils/hooks/useRecipeEditor";
 import { Ionicons } from "@expo/vector-icons";
 import { t } from "i18next";
 import React from "react";
@@ -27,8 +27,8 @@ type Props = {
   ingredientsText: string;
   setIngredientsText: (v: string) => void;
 
-  instructions: string;
-  setInstructions: (v: string) => void;
+  instructionsText: string;
+  setInstructionsText: (v: string) => void;
 
   onSave: () => void;
   onDelete: () => void;
@@ -46,8 +46,8 @@ export default function RecipeForm({
   setTagsText,
   ingredientsText,
   setIngredientsText,
-  instructions,
-  setInstructions,
+  instructionsText,
+  setInstructionsText,
   onSave,
   onDelete,
 }: Props) {
@@ -154,7 +154,7 @@ export default function RecipeForm({
           </>
         ) : (
           <View style={styles.chipsWrap}>
-            {parseIngredients(tagsText).map((item: string, idx: number) => (
+            {parseToList(tagsText).map((item: string, idx: number) => (
               <View
                 key={`${item}-${idx}`}
                 style={[
@@ -199,17 +199,15 @@ export default function RecipeForm({
           />
         ) : (
           <View style={[styles.bulletList, { backgroundColor: "transparent" }]}>
-            {parseIngredients(ingredientsText).map(
-              (item: string, idx: number) => (
-                <View
-                  key={`${item}-${idx}`}
-                  style={[styles.bulletRow, { backgroundColor: "transparent" }]}
-                >
-                  <Text style={styles.bullet}>•</Text>
-                  <Text style={styles.bulletText}>{item}</Text>
-                </View>
-              ),
-            )}
+            {parseToList(ingredientsText).map((item: string, idx: number) => (
+              <View
+                key={`${item}-${idx}`}
+                style={[styles.bulletRow, { backgroundColor: "transparent" }]}
+              >
+                <Text style={styles.bullet}>•</Text>
+                <Text style={styles.bulletText}>{item}</Text>
+              </View>
+            ))}
           </View>
         )}
       </View>
@@ -230,21 +228,35 @@ export default function RecipeForm({
             style={[
               styles.input,
               styles.multiline,
-              { minHeight: 140 },
               {
                 backgroundColor: c.cardLight,
                 borderColor: c.border,
                 color: c.text,
               },
             ]}
-            value={instructions}
-            onChangeText={setInstructions}
+            value={instructionsText}
+            onChangeText={setInstructionsText}
             placeholder={t("createRecipe.instructionsPlaceholder")}
             placeholderTextColor={c.muted}
             multiline
           />
         ) : (
-          <Text style={styles.instructions}>{instructions || "—"}</Text>
+          <View
+            style={[styles.instructionList, { backgroundColor: "transparent" }]}
+          >
+            {parseToList(instructionsText).map((item: string, idx: number) => (
+              <View
+                key={`${item}-${idx}`}
+                style={[
+                  styles.instructionRow,
+                  { backgroundColor: "transparent" },
+                ]}
+              >
+                <Text style={styles.instructionNumber}>{idx + 1}.</Text>
+                <Text style={styles.instructionText}>{item}</Text>
+              </View>
+            ))}
+          </View>
         )}
       </View>
 
@@ -350,5 +362,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     flex: 1, // wraps nicely to next line if long
+  },
+  instructionList: {
+    marginTop: 8,
+  },
+
+  instructionRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 14, // ✅ more space between steps
+  },
+
+  instructionNumber: {
+    marginRight: 10,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 22,
+  },
+
+  instructionText: {
+    fontSize: 14,
+    lineHeight: 22, // ✅ looser line spacing
+    flex: 1,
   },
 });

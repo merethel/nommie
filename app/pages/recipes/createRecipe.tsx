@@ -24,12 +24,12 @@ type Recipe = {
   description: string;
   tags: string[];
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   createdAt: number;
   photoUri?: string;
 };
 
-function parseIngredients(input: string): string[] {
+function parseToList(input: string): string[] {
   // supports commas or new lines
   return input
     .split(/\n|,/g)
@@ -67,9 +67,9 @@ export default function CreateRecipeScreen() {
       id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
       title: title.trim(),
       description: description.trim(),
-      tags: parseIngredients(tags),
-      ingredients: parseIngredients(ingredients),
-      instructions: instructions.trim(),
+      tags: parseToList(tags),
+      ingredients: parseToList(ingredients),
+      instructions: parseToList(instructions),
       createdAt: Date.now(),
       photoUri:
         photoUri ??

@@ -3,6 +3,7 @@ import HeaderTextButton from "@/components/navigation/HeaderTextButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
+import { parseStringListParam } from "@/utils/parseStringListParam";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -18,7 +19,7 @@ type Recipe = {
   description: string;
   tags: string[];
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   photoUri?: string;
   createdAt: number;
   isFavorite?: boolean;
@@ -49,26 +50,21 @@ export default function RecipeInfo() {
     photoUri?: string;
     isFavorite?: string; // optional legacy
   }>();
-
   const recipeId = params.id ?? "";
+  const initialIngredients = useMemo(
+    () => parseStringListParam(params.ingredients),
+    [params.ingredients],
+  );
 
-  const initialIngredients = useMemo(() => {
-    try {
-      return params.ingredients
-        ? (JSON.parse(params.ingredients) as string[])
-        : [];
-    } catch {
-      return [];
-    }
-  }, [params.ingredients]);
+  const initialTags = useMemo(
+    () => parseStringListParam(params.tags),
+    [params.tags],
+  );
 
-  const initialTags = useMemo(() => {
-    try {
-      return params.tags ? (JSON.parse(params.tags) as string[]) : [];
-    } catch {
-      return [];
-    }
-  }, [params.tags]);
+  const initialInstructions = useMemo(
+    () => parseStringListParam(params.instructions),
+    [params.instructions],
+  );
 
   const initial = useMemo(
     () => ({
@@ -78,7 +74,7 @@ export default function RecipeInfo() {
       description: params.description ?? "",
       tags: initialTags,
       ingredients: initialIngredients,
-      instructions: params.instructions ?? "",
+      instructions: initialInstructions,
     }),
     [
       recipeId,
@@ -87,7 +83,7 @@ export default function RecipeInfo() {
       params.description,
       initialTags,
       initialIngredients,
-      params.instructions,
+      initialInstructions,
     ],
   );
 
@@ -145,7 +141,10 @@ export default function RecipeInfo() {
           .split("\n")
           .map((s) => s.trim())
           .filter(Boolean),
-        instructions: editor.instructions,
+        instructions: editor.instructionsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean),
         photoUri: editor.photoUri,
         createdAt: Date.now(),
         isFavorite: next,
@@ -158,11 +157,11 @@ export default function RecipeInfo() {
     isFavorite,
     editor.title,
     editor.description,
+    editor.tagsText,
     editor.ingredientsText,
-    editor.instructions,
+    editor.instructionsText,
     editor.photoUri,
   ]);
-
   return (
     <>
       <Stack.Screen
@@ -197,8 +196,8 @@ export default function RecipeInfo() {
           setTagsText={editor.setTagsText}
           ingredientsText={editor.ingredientsText}
           setIngredientsText={editor.setIngredientsText}
-          instructions={editor.instructions}
-          setInstructions={editor.setInstructions}
+          instructionsText={editor.instructionsText}
+          setInstructionsText={editor.setInstructionsText}
           onSave={editor.save}
           onDelete={editor.confirmDelete}
           isFavorite={isFavorite}
