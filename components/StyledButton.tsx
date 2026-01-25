@@ -19,15 +19,15 @@ export default function StyledButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#6200ee",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 4,
+    marginTop: 12,
+    alignSelf: "flex-start",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: "#f3f4f6",
   },
   buttonText: {
-    color: "#ffffff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

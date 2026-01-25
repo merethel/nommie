@@ -37,6 +37,10 @@ const resources = {
         empty: "No recipes saved yet.",
         title: "Recipes",
       },
+      common: {
+        showMore: "Show more",
+        showLess: "Show less",
+      },
     },
   },
   da: {
@@ -72,6 +76,10 @@ const resources = {
       recipes: {
         empty: "Ingen opskrifter gemt endnu.",
         title: "Opskrifter",
+      },
+      common: {
+        showMore: "Vis mere",
+        showLess: "Vis mindre",
       },
     },
   },

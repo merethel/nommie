@@ -1,7 +1,8 @@
 import { Text, View } from "@/components/Themed";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
+import StyledButton from "../StyledButton";
 
 type Props = {
   title: string;
@@ -68,11 +69,10 @@ export function RecipeCard({
       </View>
 
       {/* Footer actions */}
-      <Pressable onPress={() => setExpanded((v) => !v)} style={styles.toggle}>
-        <Text style={styles.toggleText}>
-          {expanded ? "Show less" : "Show more"}
-        </Text>
-      </Pressable>
+      <StyledButton
+        title={expanded ? t("common.showLess") : t("common.showMore")}
+        onPress={() => setExpanded((v) => !v)}
+      />
     </View>
   );
 }
@@ -133,17 +133,5 @@ const styles = StyleSheet.create({
   instructions: {
     opacity: 0.9,
     lineHeight: 18,
-  },
-  toggle: {
-    marginTop: 12,
-    alignSelf: "flex-start",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    backgroundColor: "#f3f4f6",
-  },
-  toggleText: {
-    fontSize: 12,
-    fontWeight: "600",
   },
 });

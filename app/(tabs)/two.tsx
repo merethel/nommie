@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet } from "react-native";
 
 import { Text } from "@/components/Themed";
 import { t } from "i18next";
-import { RecipeCard } from "../pages/recipes/RecipeCard";
+import { RecipeCard } from "../../components/recipes/RecipeCard";
 
 const RECIPES_KEY = "nommie_recipes";
 

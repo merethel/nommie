@@ -16,10 +16,12 @@ export default function TabOneScreen() {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <StyledButton
-        title={t("createRecipe.screenTitle")}
-        onPress={() => router.push("../pages/recipes/createRecipe")}
-      />
+      <View>
+        <StyledButton
+          title={t("createRecipe.screenTitle")}
+          onPress={() => router.push("../pages/recipes/createRecipe")}
+        />
+      </View>
     </View>
   );
 }
