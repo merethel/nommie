@@ -1,5 +1,6 @@
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, TextInput } from "react-native";
 
 import StyledButton from "@/components/StyledButton";
@@ -7,6 +8,7 @@ import { Text, View } from "@/components/Themed";
 
 export default function CreateRecipeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -15,59 +17,56 @@ export default function CreateRecipeScreen() {
 
   return (
     <>
-      {/* Header with back button */}
-      <Stack.Screen options={{ title: "Opret opskrift" }} />
+      <Stack.Screen options={{ title: t("createRecipe.screenTitle") }} />
 
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.label}>Titel</Text>
+        <Text style={styles.label}>{t("createRecipe.titleLabel")}</Text>
         <TextInput
           style={styles.input}
           value={title}
           onChangeText={setTitle}
-          placeholder="Fx Pasta carbonara"
+          placeholder={t("createRecipe.titlePlaceholder")}
         />
 
-        <Text style={styles.label}>Beskrivelse</Text>
+        <Text style={styles.label}>{t("createRecipe.descriptionLabel")}</Text>
         <TextInput
           style={styles.input}
           value={description}
           onChangeText={setDescription}
-          placeholder="Kort beskrivelse (valgfri)"
+          placeholder={t("createRecipe.descriptionPlaceholder")}
         />
 
-        <Text style={styles.label}>Ingredienser</Text>
+        <Text style={styles.label}>{t("createRecipe.ingredientsLabel")}</Text>
         <TextInput
           style={[styles.input, styles.multiline]}
           value={ingredients}
           onChangeText={setIngredients}
-          placeholder="Fx pasta, æg, parmesan, bacon"
+          placeholder={t("createRecipe.ingredientsPlaceholder")}
           multiline
         />
 
-        <Text style={styles.label}>Fremgangsmåde</Text>
+        <Text style={styles.label}>{t("createRecipe.instructionsLabel")}</Text>
         <TextInput
           style={[styles.input, styles.multiline]}
           value={instructions}
           onChangeText={setInstructions}
-          placeholder="Hvordan laves retten?"
+          placeholder={t("createRecipe.instructionsPlaceholder")}
           multiline
         />
 
         <View style={styles.buttons}>
           <StyledButton
-            title="Gem"
+            title={t("createRecipe.save")}
             onPress={() => {
-              console.log({
-                title,
-                description,
-                ingredients,
-                instructions,
-              });
+              console.log({ title, description, ingredients, instructions });
               router.back();
             }}
           />
 
-          <StyledButton title="Annuller" onPress={() => router.back()} />
+          <StyledButton
+            title={t("createRecipe.cancel")}
+            onPress={() => router.back()}
+          />
         </View>
       </ScrollView>
     </>
@@ -75,14 +74,8 @@ export default function CreateRecipeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 4,
-    fontWeight: "600",
-  },
+  container: { padding: 16 },
+  label: { fontSize: 14, marginBottom: 4, fontWeight: "600" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -91,12 +84,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#fff",
   },
-  multiline: {
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  buttons: {
-    gap: 12,
-    marginTop: 8,
-  },
+  multiline: { minHeight: 80, textAlignVertical: "top" },
+  buttons: { gap: 12, marginTop: 8 },
 });
