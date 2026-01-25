@@ -1,15 +1,20 @@
-// components/recipe/RecipeForm.tsx
+// components/recipeInfoScreen/RecipeForm.tsx
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { parseIngredients } from "@/utils/hooks/useRecipeEditor";
+import { Ionicons } from "@expo/vector-icons";
 import { t } from "i18next";
 import React from "react";
-import { View as RNView, StyleSheet, TextInput } from "react-native";
+import { Pressable, View as RNView, StyleSheet, TextInput } from "react-native";
 
 type Props = {
   isEditing: boolean;
+
+  // ✅ favorite
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 
   title: string;
   setTitle: (v: string) => void;
@@ -29,6 +34,8 @@ type Props = {
 
 export default function RecipeForm({
   isEditing,
+  isFavorite,
+  onToggleFavorite,
   title,
   setTitle,
   description,
@@ -72,7 +79,21 @@ export default function RecipeForm({
             />
           </>
         ) : (
-          <Text style={styles.bigTitle}>{title}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.bigTitle}>{title}</Text>
+
+            <Pressable
+              onPress={onToggleFavorite}
+              hitSlop={10}
+              style={styles.heartBtn}
+            >
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={22}
+                color={isFavorite ? "#E11D48" : c.text}
+              />
+            </Pressable>
+          </View>
         )}
       </View>
 
@@ -209,6 +230,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     opacity: 0.85,
   },
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  heartBtn: { padding: 6 },
+
   bigTitle: { fontSize: 24, fontWeight: "800" },
   bodyText: { fontSize: 14, opacity: 0.9 },
 
