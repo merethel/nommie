@@ -190,7 +190,13 @@ export default function RecipeInfo() {
     <>
       <Stack.Screen
         options={{
-          title: title || t("recipes.title"),
+          title: "",
+          headerShown: true,
+          headerBackground: () => null,
+          headerBackButtonDisplayMode: "minimal",
+          headerTintColor: "#000",
+          headerTransparent: true,
+
           headerRight: () => (
             <Pressable
               onPress={() => (isEditing ? onCancelEdit() : setIsEditing(true))}
