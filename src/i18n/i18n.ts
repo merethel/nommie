@@ -23,6 +23,7 @@ const resources = {
           ingredientsRequired: "At least one ingredient is required",
           instructionsRequired: "Instructions are required",
         },
+        addPhoto: "Add photo",
       },
       settings: {
         screenTitle: "Settings",
@@ -76,6 +77,7 @@ const resources = {
           ingredientsRequired: "Mindst én ingrediens er påkrævet",
           instructionsRequired: "Fremgangsmåde er påkrævet",
         },
+        addPhoto: "Tilføj foto",
       },
       settings: {
         screenTitle: "Indstillinger",

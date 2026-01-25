@@ -1,7 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, TextInput } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+} from "react-native";
 
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
@@ -16,6 +23,7 @@ type Recipe = {
   ingredients: string[]; // store as array
   instructions: string;
   createdAt: number;
+  photoUri?: string;
 };
 
 function parseIngredients(input: string): string[] {
@@ -33,6 +41,20 @@ export default function CreateRecipeScreen() {
   const [description, setDescription] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+
+  async function pickImage() {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  }
 
   async function handleSave() {
     const newRecipe: Recipe = {
@@ -42,6 +64,9 @@ export default function CreateRecipeScreen() {
       ingredients: parseIngredients(ingredients),
       instructions: instructions.trim(),
       createdAt: Date.now(),
+      photoUri:
+        photoUri ??
+        "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
     };
 
     const existing = await AsyncStorage.getItem(RECIPES_KEY);
@@ -59,6 +84,18 @@ export default function CreateRecipeScreen() {
       <Stack.Screen options={{ title: t("createRecipe.screenTitle") }} />
 
       <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.label}>{t("createRecipe.photoLabel")}</Text>
+
+        <Pressable style={styles.imagePicker} onPress={pickImage}>
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} style={styles.image} />
+          ) : (
+            <Text style={styles.imagePlaceholder}>
+              {t("createRecipe.addPhoto")}
+            </Text>
+          )}
+        </Pressable>
+
         <Text style={styles.label}>{t("createRecipe.titleLabel")}</Text>
         <TextInput
           style={styles.input}
@@ -118,4 +155,22 @@ const styles = StyleSheet.create({
   },
   multiline: { minHeight: 80, textAlignVertical: "top" },
   buttons: { gap: 12, marginTop: 8 },
+  imagePicker: {
+    height: 180,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginBottom: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f9fafb",
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
+  imagePlaceholder: {
+    opacity: 0.6,
+  },
 });

@@ -15,6 +15,7 @@ type Recipe = {
   description: string;
   ingredients: string[];
   instructions: string;
+  photoUri?: string;
   createdAt: number;
 };
 
@@ -45,10 +46,12 @@ export default function TabTwoScreen() {
         recipes.map((r) => (
           <RecipeCard
             key={r.id}
+            id={r.id}
             title={r.title}
             description={r.description}
             ingredients={r.ingredients}
             instructions={r.instructions}
+            photoUri={r.photoUri}
           />
         ))
       )}

@@ -2,7 +2,7 @@ import { Text, View } from "@/components/Themed";
 import { router } from "expo-router";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, TouchableOpacity } from "react-native";
 
 type Props = {
   id: string;
@@ -10,6 +10,7 @@ type Props = {
   description?: string;
   ingredients: string[];
   instructions: string;
+  photoUri?: string;
 };
 
 export function RecipeCard({
@@ -18,6 +19,7 @@ export function RecipeCard({
   description,
   ingredients,
   instructions,
+  photoUri,
 }: Props) {
   const [expanded] = useState(false);
 
@@ -38,11 +40,23 @@ export function RecipeCard({
             description: description ?? "",
             ingredients: JSON.stringify(ingredients),
             instructions,
+            photoUri:
+              photoUri ??
+              "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
           },
         })
       }
     >
       <View style={styles.header}>
+        {/*image*/}
+        {photoUri && (
+          <Image
+            source={{ uri: photoUri }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        )}
+
         <Text style={styles.title}>{title}</Text>
         {!!description?.trim() && (
           <Text style={styles.description}>{description.trim()}</Text>
@@ -100,4 +114,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9fafb",
   },
   chipText: { fontSize: 12 },
+  image: {
+    width: "100%",
+    height: 150,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
 });
