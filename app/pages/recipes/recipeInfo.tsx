@@ -3,6 +3,7 @@ import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { Text } from "@/components/Themed";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import React, { useMemo } from "react";
@@ -55,9 +56,23 @@ export default function RecipeInfo() {
         options={{
           title: "",
           headerShown: true,
-          headerBackButtonDisplayMode: "minimal",
-          headerTintColor: "#000",
           headerTransparent: true,
+
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.back()}
+              style={styles.backBtn}
+              hitSlop={10}
+            >
+              <Ionicons
+                name="chevron-back"
+                size={30}
+                color="#fff"
+                style={styles.backIcon}
+              />
+            </Pressable>
+          ),
+
           headerRight: () => (
             <Pressable
               onPress={() =>
@@ -101,6 +116,25 @@ export default function RecipeInfo() {
 
 const styles = StyleSheet.create({
   container: { paddingTop: 35 },
-  headerBtn: { marginRight: 12, paddingHorizontal: 8, paddingVertical: 6 },
-  headerBtnText: { fontSize: 15, fontWeight: "600" },
+
+  backBtn: {},
+  backIcon: {
+    textShadowColor: "rgba(0,0,0,0.85)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
+
+  headerBtn: {
+    marginRight: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  headerBtnText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+    textShadowColor: "rgba(0,0,0,0.85)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+  },
 });
