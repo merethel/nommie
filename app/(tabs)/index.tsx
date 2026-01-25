@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 
 import StyledButton from "@/components/StyledButton";
 import { Text, View } from "@/components/Themed";
+import { router } from "expo-router";
 
 export default function TabOneScreen() {
   return (
@@ -12,7 +13,10 @@ export default function TabOneScreen() {
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
-      <StyledButton title="Opret opskrift" />
+      <StyledButton
+        title="Opret opskrift"
+        onPress={() => router.push("../pages/recipes/createRecipe")}
+      />
     </View>
   );
 }
