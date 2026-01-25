@@ -25,6 +25,7 @@ const resources = {
         },
         addPhoto: "Add photo",
         photoLabel: "Photo",
+        changePhoto: "Change photo",
       },
       settings: {
         screenTitle: "Settings",
@@ -80,6 +81,7 @@ const resources = {
         },
         addPhoto: "Tilføj foto",
         photoLabel: "Foto",
+        changePhoto: "Skift foto",
       },
       settings: {
         screenTitle: "Indstillinger",

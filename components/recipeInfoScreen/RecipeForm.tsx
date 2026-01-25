@@ -44,7 +44,13 @@ export default function RecipeForm({
   const c = Colors[scheme];
 
   return (
-    <View style={styles.content} pointerEvents="box-none">
+    <View
+      style={[
+        styles.content,
+        { paddingTop: isEditing ? 12 : HEADER_HEIGHT - 90 },
+      ]}
+      pointerEvents="box-none"
+    >
       {/* Title */}
       <View style={styles.block}>
         {isEditing ? (
@@ -195,7 +201,6 @@ const styles = StyleSheet.create({
   content: {
     zIndex: 1,
     backgroundColor: "transparent",
-    paddingTop: HEADER_HEIGHT - 90,
   },
   block: { marginBottom: 14, backgroundColor: "transparent" },
   label: {
