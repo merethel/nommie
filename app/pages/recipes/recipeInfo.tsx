@@ -16,6 +16,7 @@ type Recipe = {
   id: string;
   title: string;
   description: string;
+  tags: string[];
   ingredients: string[];
   instructions: string;
   photoUri?: string;
@@ -42,6 +43,7 @@ export default function RecipeInfo() {
     id?: string;
     title?: string;
     description?: string;
+    tags?: string;
     ingredients?: string;
     instructions?: string;
     photoUri?: string;
@@ -60,12 +62,21 @@ export default function RecipeInfo() {
     }
   }, [params.ingredients]);
 
+  const initialTags = useMemo(() => {
+    try {
+      return params.tags ? (JSON.parse(params.tags) as string[]) : [];
+    } catch {
+      return [];
+    }
+  }, [params.tags]);
+
   const initial = useMemo(
     () => ({
       id: recipeId,
       photoUri: params.photoUri ?? "",
       title: params.title ?? "",
       description: params.description ?? "",
+      tags: initialTags,
       ingredients: initialIngredients,
       instructions: params.instructions ?? "",
     }),
@@ -74,6 +85,7 @@ export default function RecipeInfo() {
       params.photoUri,
       params.title,
       params.description,
+      initialTags,
       initialIngredients,
       params.instructions,
     ],
@@ -125,6 +137,10 @@ export default function RecipeInfo() {
         id: recipeId,
         title: editor.title,
         description: editor.description,
+        tags: editor.tagsText
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean),
         ingredients: editor.ingredientsText
           .split("\n")
           .map((s) => s.trim())
@@ -177,6 +193,8 @@ export default function RecipeInfo() {
           setTitle={editor.setTitle}
           description={editor.description}
           setDescription={editor.setDescription}
+          tagsText={editor.tagsText}
+          setTagsText={editor.setTagsText}
           ingredientsText={editor.ingredientsText}
           setIngredientsText={editor.setIngredientsText}
           instructions={editor.instructions}

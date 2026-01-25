@@ -26,6 +26,8 @@ const resources = {
         addPhoto: "Add photo",
         photoLabel: "Photo",
         changePhoto: "Change photo",
+        tagsLabel: "Tags",
+        tagsPlaceholder: "e.g. Italian, Quick Meals",
       },
       settings: {
         screenTitle: "Settings",
@@ -82,6 +84,8 @@ const resources = {
         addPhoto: "Tilføj foto",
         photoLabel: "Foto",
         changePhoto: "Skift foto",
+        tagsLabel: "Tags",
+        tagsPlaceholder: "Fx Italiensk, Hurtige retter",
       },
       settings: {
         screenTitle: "Indstillinger",

@@ -13,11 +13,12 @@ type Recipe = {
   id: string;
   title: string;
   description: string;
+  tags: string[];
   ingredients: string[];
   instructions: string;
   photoUri?: string;
   createdAt: number;
-  isFavorite?: boolean; // ✅ add this
+  isFavorite?: boolean;
 };
 
 export default function TabTwoScreen() {
@@ -65,6 +66,7 @@ export default function TabTwoScreen() {
             id={r.id}
             title={r.title}
             description={r.description}
+            tags={r.tags}
             ingredients={r.ingredients}
             instructions={r.instructions}
             photoUri={r.photoUri}

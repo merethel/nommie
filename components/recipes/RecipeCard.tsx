@@ -3,7 +3,6 @@ import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { t } from "i18next";
 import { useMemo, useState } from "react";
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 
@@ -11,6 +10,7 @@ type Props = {
   id: string;
   title: string;
   description?: string;
+  tags: string[];
   ingredients: string[];
   instructions: string;
   photoUri?: string;
@@ -22,6 +22,7 @@ export function RecipeCard({
   id,
   title,
   description,
+  tags,
   ingredients,
   instructions,
   photoUri,
@@ -32,10 +33,10 @@ export function RecipeCard({
   const scheme = useColorScheme() ?? "light";
   const c = Colors[scheme];
 
-  const visibleIngredients = useMemo(() => {
-    if (expanded) return ingredients;
-    return ingredients.slice(0, 6);
-  }, [expanded, ingredients]);
+  const visibleTags = useMemo(() => {
+    if (expanded) return tags;
+    return tags.slice(0, 6);
+  }, [expanded, tags]);
 
   return (
     <TouchableOpacity
@@ -47,6 +48,7 @@ export function RecipeCard({
             id,
             title,
             description: description ?? "",
+            tags: JSON.stringify(tags),
             ingredients: JSON.stringify(ingredients),
             instructions,
             photoUri:
@@ -73,7 +75,7 @@ export function RecipeCard({
 
           <TouchableOpacity
             onPress={(e) => {
-              e.stopPropagation(); // ✅ don't navigate
+              e.stopPropagation(); // don't navigate
               onToggleFavorite(id);
             }}
             hitSlop={10}
@@ -93,11 +95,8 @@ export function RecipeCard({
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {t("createRecipe.ingredientsLabel")}
-        </Text>
         <View style={styles.chipsWrap}>
-          {visibleIngredients.map((item, idx) => (
+          {visibleTags.map((item, idx) => (
             <View
               key={`${item}-${idx}`}
               style={[
@@ -124,7 +123,7 @@ const styles = StyleSheet.create({
   },
   header: { marginBottom: 10, backgroundColor: "transparent" },
   description: { marginTop: 4, opacity: 0.75 },
-  section: { marginTop: 10, backgroundColor: "transparent" },
+  section: { backgroundColor: "transparent" },
   sectionTitle: {
     fontSize: 13,
     fontWeight: "600",

@@ -13,6 +13,7 @@ export type Recipe = {
   description?: string;
   ingredients: string[];
   instructions: string;
+  tags: string[];
   createdAt?: number;
   photoUri?: string;
 };
@@ -28,6 +29,7 @@ export type RecipeInitial = {
   id: string;
   title: string;
   description: string;
+  tags: string[];
   ingredients: string[];
   instructions: string;
   photoUri: string;
@@ -38,6 +40,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
 
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description);
+  const [tagsText, setTagsText] = useState(initial.tags.join(", "));
   const [ingredientsText, setIngredientsText] = useState(
     initial.ingredients.join(", "),
   );
@@ -47,6 +50,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
   function reset() {
     setTitle(initial.title);
     setDescription(initial.description);
+    setTagsText(initial.tags.join(", "));
     setIngredientsText(initial.ingredients.join(", "));
     setInstructions(initial.instructions);
     setPhotoUri(initial.photoUri);
@@ -57,6 +61,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
     const updated: Partial<Recipe> = {
       title: title.trim(),
       description: description.trim(),
+      tags: parseIngredients(tagsText),
       ingredients: parseIngredients(ingredientsText),
       instructions: instructions.trim(),
       photoUri:
@@ -92,6 +97,7 @@ export function useRecipeEditor(initial: RecipeInitial) {
       router.setParams({
         title: updated.title,
         description: updated.description ?? "",
+        tags: JSON.stringify(updated.tags ?? []),
         ingredients: JSON.stringify(updated.ingredients ?? []),
         instructions: updated.instructions ?? "",
         photoUri: updated.photoUri ?? "",
@@ -146,6 +152,8 @@ export function useRecipeEditor(initial: RecipeInitial) {
     setTitle,
     description,
     setDescription,
+    tagsText,
+    setTagsText,
     ingredientsText,
     setIngredientsText,
     instructions,

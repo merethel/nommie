@@ -12,7 +12,6 @@ import { Pressable, View as RNView, StyleSheet, TextInput } from "react-native";
 type Props = {
   isEditing: boolean;
 
-  // ✅ favorite
   isFavorite: boolean;
   onToggleFavorite: () => void;
 
@@ -21,6 +20,9 @@ type Props = {
 
   description: string;
   setDescription: (v: string) => void;
+
+  tagsText: string;
+  setTagsText: (v: string) => void;
 
   ingredientsText: string;
   setIngredientsText: (v: string) => void;
@@ -40,6 +42,8 @@ export default function RecipeForm({
   setTitle,
   description,
   setDescription,
+  tagsText,
+  setTagsText,
   ingredientsText,
   setIngredientsText,
   instructions,
@@ -121,6 +125,49 @@ export default function RecipeForm({
           </>
         ) : (
           <Text style={styles.bodyText}>{description || "—"}</Text>
+        )}
+      </View>
+
+      {/* Tags */}
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: c.card, borderColor: c.border },
+        ]}
+      >
+        <Text style={styles.sectionTitle}>{t("createRecipe.tagsLabel")}</Text>
+
+        {isEditing ? (
+          <TextInput
+            style={[
+              styles.input,
+              styles.multiline,
+              {
+                backgroundColor: c.cardLight,
+                borderColor: c.border,
+                color: c.text,
+              },
+            ]}
+            value={tagsText}
+            onChangeText={setTagsText}
+            placeholder={t("createRecipe.tagsPlaceholder")}
+            placeholderTextColor={c.muted}
+            multiline
+          />
+        ) : (
+          <View style={styles.chipsWrap}>
+            {parseIngredients(tagsText).map((item: string, idx: number) => (
+              <View
+                key={`${item}-${idx}`}
+                style={[
+                  styles.chip,
+                  { backgroundColor: c.secondary, borderColor: c.border },
+                ]}
+              >
+                <Text style={styles.chipText}>{item}</Text>
+              </View>
+            ))}
+          </View>
         )}
       </View>
 

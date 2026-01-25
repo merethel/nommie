@@ -22,7 +22,8 @@ type Recipe = {
   id: string;
   title: string;
   description: string;
-  ingredients: string[]; // store as array
+  tags: string[];
+  ingredients: string[];
   instructions: string;
   createdAt: number;
   photoUri?: string;
@@ -43,6 +44,7 @@ export default function CreateRecipeScreen() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -65,6 +67,7 @@ export default function CreateRecipeScreen() {
       id: `${Date.now()}_${Math.random().toString(16).slice(2)}`,
       title: title.trim(),
       description: description.trim(),
+      tags: parseIngredients(tags),
       ingredients: parseIngredients(ingredients),
       instructions: instructions.trim(),
       createdAt: Date.now(),
@@ -120,6 +123,19 @@ export default function CreateRecipeScreen() {
           value={description}
           onChangeText={setDescription}
           placeholder={t("createRecipe.descriptionPlaceholder")}
+        />
+
+        <Text style={styles.label}>{t("createRecipe.tagsLabel")}</Text>
+        <TextInput
+          style={[
+            styles.input,
+            styles.multiline,
+            { borderColor: c.border, backgroundColor: c.card },
+          ]}
+          value={tags}
+          onChangeText={setTags}
+          placeholder={t("createRecipe.tagsPlaceholder")}
+          multiline
         />
 
         <Text style={styles.label}>{t("createRecipe.ingredientsLabel")}</Text>
