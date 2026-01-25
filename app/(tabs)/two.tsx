@@ -17,6 +17,7 @@ type Recipe = {
   instructions: string;
   photoUri?: string;
   createdAt: number;
+  isFavorite?: boolean; // ✅ add this
 };
 
 export default function TabTwoScreen() {
@@ -26,6 +27,23 @@ export default function TabTwoScreen() {
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
     setRecipes(data);
+  }, []);
+
+  const toggleFavorite = useCallback(async (id: string) => {
+    // optimistic UI update
+    setRecipes((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, isFavorite: !r.isFavorite } : r)),
+    );
+
+    // persist
+    const json = await AsyncStorage.getItem(RECIPES_KEY);
+    const data: Recipe[] = json ? JSON.parse(json) : [];
+
+    const next = data.map((r) =>
+      r.id === id ? { ...r, isFavorite: !r.isFavorite } : r,
+    );
+
+    await AsyncStorage.setItem(RECIPES_KEY, JSON.stringify(next));
   }, []);
 
   // Reload every time you navigate back to this tab
@@ -50,6 +68,8 @@ export default function TabTwoScreen() {
             ingredients={r.ingredients}
             instructions={r.instructions}
             photoUri={r.photoUri}
+            isFavorite={!!r.isFavorite}
+            onToggleFavorite={toggleFavorite}
           />
         ))
       )}
