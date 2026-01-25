@@ -129,31 +129,29 @@ export default function RecipeForm({
       </View>
 
       {/* Tags */}
-      <View
-        style={[
-          styles.card,
-          { backgroundColor: c.card, borderColor: c.border },
-        ]}
-      >
-        <Text style={styles.sectionTitle}>{t("createRecipe.tagsLabel")}</Text>
-
+      <View>
         {isEditing ? (
-          <TextInput
-            style={[
-              styles.input,
-              styles.multiline,
-              {
-                backgroundColor: c.cardLight,
-                borderColor: c.border,
-                color: c.text,
-              },
-            ]}
-            value={tagsText}
-            onChangeText={setTagsText}
-            placeholder={t("createRecipe.tagsPlaceholder")}
-            placeholderTextColor={c.muted}
-            multiline
-          />
+          <>
+            <Text style={styles.sectionTitle}>
+              {t("createRecipe.tagsLabel")}
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                styles.multiline,
+                {
+                  backgroundColor: c.cardLight,
+                  borderColor: c.border,
+                  color: c.text,
+                },
+              ]}
+              value={tagsText}
+              onChangeText={setTagsText}
+              placeholder={t("createRecipe.tagsPlaceholder")}
+              placeholderTextColor={c.muted}
+              multiline
+            />
+          </>
         ) : (
           <View style={styles.chipsWrap}>
             {parseIngredients(tagsText).map((item: string, idx: number) => (
@@ -200,17 +198,15 @@ export default function RecipeForm({
             multiline
           />
         ) : (
-          <View style={styles.chipsWrap}>
+          <View style={[styles.bulletList, { backgroundColor: "transparent" }]}>
             {parseIngredients(ingredientsText).map(
               (item: string, idx: number) => (
                 <View
                   key={`${item}-${idx}`}
-                  style={[
-                    styles.chip,
-                    { backgroundColor: c.secondary, borderColor: c.border },
-                  ]}
+                  style={[styles.bulletRow, { backgroundColor: "transparent" }]}
                 >
-                  <Text style={styles.chipText}>{item}</Text>
+                  <Text style={styles.bullet}>•</Text>
+                  <Text style={styles.bulletText}>{item}</Text>
                 </View>
               ),
             )}
@@ -333,5 +329,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     justifyContent: "center",
+  },
+  bulletList: {
+    marginTop: 6,
+  },
+
+  bulletRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+
+  bullet: {
+    marginRight: 8,
+    fontSize: 16,
+    lineHeight: 20,
+  },
+
+  bulletText: {
+    fontSize: 14,
+    lineHeight: 20,
+    flex: 1, // wraps nicely to next line if long
   },
 });
