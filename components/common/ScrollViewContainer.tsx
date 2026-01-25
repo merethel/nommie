@@ -1,14 +1,23 @@
 import { View } from "@/components/Themed";
-import { ScrollView, StyleSheet } from "react-native";
+import React from "react";
+import { ScrollView, StyleProp, StyleSheet, ViewStyle } from "react-native";
+
+type Props = {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
+};
 
 export default function ScrollViewContainer({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+  style,
+  contentContainerStyle,
+}: Props) {
   return (
-    <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <View style={[styles.root, style]}>
+      <ScrollView
+        contentContainerStyle={[styles.container, contentContainerStyle]}
+      >
         {children}
       </ScrollView>
     </View>

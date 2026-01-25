@@ -1,6 +1,8 @@
 // components/recipe/RecipeForm.tsx
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
+import { useColorScheme } from "@/components/useColorScheme";
+import Colors from "@/constants/Colors";
 import { parseIngredients } from "@/utils/hooks/useRecipeEditor";
 import { t } from "i18next";
 import React from "react";
@@ -38,6 +40,9 @@ export default function RecipeForm({
   onSave,
   onDelete,
 }: Props) {
+  const scheme = useColorScheme() ?? "light";
+  const c = Colors[scheme];
+
   return (
     <View style={styles.content} pointerEvents="box-none">
       {/* Title */}
@@ -46,10 +51,18 @@ export default function RecipeForm({
           <>
             <Text style={styles.label}>{t("createRecipe.titleLabel")}</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: c.card,
+                  borderColor: c.border,
+                  color: c.text,
+                },
+              ]}
               value={title}
               onChangeText={setTitle}
               placeholder={t("createRecipe.titlePlaceholder")}
+              placeholderTextColor={c.muted}
             />
           </>
         ) : (
@@ -65,10 +78,18 @@ export default function RecipeForm({
               {t("createRecipe.descriptionLabel")}
             </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: c.card,
+                  borderColor: c.border,
+                  color: c.text,
+                },
+              ]}
               value={description}
               onChangeText={setDescription}
               placeholder={t("createRecipe.descriptionPlaceholder")}
+              placeholderTextColor={c.muted}
             />
           </>
         ) : (
@@ -77,42 +98,71 @@ export default function RecipeForm({
       </View>
 
       {/* Ingredients */}
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: c.card, borderColor: c.border },
+        ]}
+      >
         <Text style={styles.sectionTitle}>
           {t("createRecipe.ingredientsLabel")}
         </Text>
 
         {isEditing ? (
           <TextInput
-            style={[styles.input, styles.multiline]}
+            style={[
+              styles.input,
+              styles.multiline,
+              { backgroundColor: c.card, borderColor: c.border, color: c.text },
+            ]}
             value={ingredientsText}
             onChangeText={setIngredientsText}
             placeholder={t("createRecipe.ingredientsPlaceholder")}
+            placeholderTextColor={c.muted}
             multiline
           />
         ) : (
           <View style={styles.chipsWrap}>
-            {parseIngredients(ingredientsText).map((item, idx) => (
-              <View key={`${item}-${idx}`} style={styles.chip}>
-                <Text style={styles.chipText}>{item}</Text>
-              </View>
-            ))}
+            {parseIngredients(ingredientsText).map(
+              (item: string, idx: number) => (
+                <View
+                  key={`${item}-${idx}`}
+                  style={[
+                    styles.chip,
+                    { backgroundColor: c.secondary, borderColor: c.border },
+                  ]}
+                >
+                  <Text style={styles.chipText}>{item}</Text>
+                </View>
+              ),
+            )}
           </View>
         )}
       </View>
 
       {/* Instructions */}
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: c.card, borderColor: c.border },
+        ]}
+      >
         <Text style={styles.sectionTitle}>
           {t("createRecipe.instructionsLabel")}
         </Text>
 
         {isEditing ? (
           <TextInput
-            style={[styles.input, styles.multiline, { minHeight: 140 }]}
+            style={[
+              styles.input,
+              styles.multiline,
+              { minHeight: 140 },
+              { backgroundColor: c.card, borderColor: c.border, color: c.text },
+            ]}
             value={instructions}
             onChangeText={setInstructions}
             placeholder={t("createRecipe.instructionsPlaceholder")}
+            placeholderTextColor={c.muted}
             multiline
           />
         ) : (
@@ -153,18 +203,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#fff",
     marginTop: 12,
   },
   sectionTitle: { fontSize: 14, fontWeight: "700", marginBottom: 10 },
 
   input: {
     borderWidth: 1,
-    borderColor: "#d1d5db",
     borderRadius: 10,
     padding: 10,
-    backgroundColor: "#fff",
   },
   multiline: { minHeight: 90, textAlignVertical: "top" },
 
@@ -179,8 +225,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#f9fafb",
   },
   chipText: { fontSize: 12 },
 

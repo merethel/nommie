@@ -1,3 +1,4 @@
+import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { Text } from "@/components/Themed";
@@ -5,7 +6,7 @@ import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import React, { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 export default function RecipeInfo() {
   const params = useLocalSearchParams<{
@@ -72,7 +73,7 @@ export default function RecipeInfo() {
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollViewContainer contentContainerStyle={styles.container}>
         <WavyHeaderImage
           isEditing={editor.isEditing}
           photoUri={editor.photoUri}
@@ -93,13 +94,13 @@ export default function RecipeInfo() {
           onSave={editor.save}
           onDelete={editor.confirmDelete}
         />
-      </ScrollView>
+      </ScrollViewContainer>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 28, position: "relative" },
+  container: { paddingTop: 35 },
   headerBtn: { marginRight: 12, paddingHorizontal: 8, paddingVertical: 6 },
   headerBtnText: { fontSize: 15, fontWeight: "600" },
 });
