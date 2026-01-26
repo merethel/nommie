@@ -5,7 +5,13 @@ import { DEFAULT_RECIPE_IMAGE, PLAN_MEAL_IMAGE } from "@/constants/images";
 import { getRecipeById } from "@/utils/recipes/recipeStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dimensions,
   ImageBackground,
@@ -51,6 +57,9 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
 
   const items = useMemo(() => meals.slice(0, 3), [meals]);
 
+  // ✅ auto-advance: pause while user interacts
+  const isInteractingRef = useRef(false);
+
   const openRecipe = async (id: string) => {
     const recipe = await getRecipeById(id);
     if (!recipe) return;
@@ -79,6 +88,40 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
     setIndex(Math.round(x / pageWidth));
   };
 
+  // ✅ auto-advance: robust "go to index"
+  const goToIndex = useCallback(
+    (nextIdx: number, animated = true) => {
+      scrollRef.current?.scrollTo({
+        x: nextIdx * pageWidth,
+        y: 0,
+        animated,
+      });
+      setIndex(nextIdx);
+    },
+    [pageWidth],
+  );
+
+  // ✅ auto-advance every 3 seconds
+  useEffect(() => {
+    if (items.length <= 1) return;
+
+    const id = setInterval(() => {
+      if (isInteractingRef.current) return;
+
+      setIndex((prev) => {
+        const next = (prev + 1) % items.length;
+        scrollRef.current?.scrollTo({
+          x: next * pageWidth,
+          y: 0,
+          animated: true,
+        });
+        return next;
+      });
+    }, 3000);
+
+    return () => clearInterval(id);
+  }, [items.length, pageWidth]);
+
   // Caption based on current slide (so it also stays fixed)
   const current = items[index];
   const hasRecipe = !!current?.recipe;
@@ -97,6 +140,24 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onMomentumEnd}
+        // ✅ auto-advance: pause while user swipes/touches
+        onScrollBeginDrag={() => {
+          isInteractingRef.current = true;
+        }}
+        onScrollEndDrag={() => {
+          // momentum may continue; release a bit later
+          setTimeout(() => {
+            isInteractingRef.current = false;
+          }, 350);
+        }}
+        onTouchStart={() => {
+          isInteractingRef.current = true;
+        }}
+        onTouchEnd={() => {
+          setTimeout(() => {
+            isInteractingRef.current = false;
+          }, 350);
+        }}
       >
         {items.map((meal) => {
           const hasRecipe = !!meal.recipe;
@@ -181,7 +242,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.15)",
   },
 
-  // This sits on top of the carousel and does NOT move
   fixedOverlay: {
     position: "absolute",
     left: 0,
