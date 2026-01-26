@@ -12,6 +12,7 @@ import QuickActionsRow from "@/components/home/QuickActionsRow";
 import TopHeroCarousel from "@/components/home/TopHeroCarousel";
 
 import Colors from "@/constants/Colors";
+import { BOTTOM_NAV_HEIGHT, BOTTOM_NAV_MARGIN } from "@/constants/layout";
 import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
 import {
   getTopCookedRecipes,
@@ -58,7 +59,11 @@ export default function TabOneScreen() {
   return (
     <ScrollViewContainer
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingTop: 0, marginTop: 0 }}
+      contentContainerStyle={{
+        paddingTop: 0,
+        marginTop: 0,
+        paddingBottom: BOTTOM_NAV_HEIGHT + BOTTOM_NAV_MARGIN + 12,
+      }}
     >
       <Stack.Screen />
 

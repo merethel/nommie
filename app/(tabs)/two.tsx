@@ -6,11 +6,13 @@ import { Keyboard, Pressable, StyleSheet } from "react-native";
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text } from "@/components/Themed";
 import { t } from "i18next";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RecipeCard } from "../../components/recipes/RecipeCard";
 
 import RecipeSearchBar, {
   RecipeSearchScope,
 } from "@/components/recipes/RecipeSearchBar";
+import { BOTTOM_NAV_HEIGHT, BOTTOM_NAV_MARGIN } from "@/constants/layout";
 import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
@@ -27,7 +29,7 @@ export default function TabTwoScreen() {
 
   const allOff = !scope.text && !scope.tags && !scope.ingredients;
   const hasQuery = query.trim().length > 0;
-
+  const insets = useSafeAreaInsets();
   const loadRecipes = useCallback(async () => {
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
@@ -62,7 +64,13 @@ export default function TabTwoScreen() {
   return (
     <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
       <ScrollViewContainer
-        contentContainerStyle={styles.container}
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingBottom:
+              BOTTOM_NAV_HEIGHT + BOTTOM_NAV_MARGIN + insets.bottom,
+          },
+        ]}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
@@ -104,7 +112,6 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 12,
-    paddingBottom: 24,
   },
   helperText: {
     opacity: 0.7,

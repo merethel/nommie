@@ -1,37 +1,48 @@
-const tintColorLight = "#F4A938"; // warm golden yellow
-const tintColorDark = "#F6C453";
+const tintColorLight = "#F2B84B"; // softer, honey-like gold
+const tintColorDark = "#F4C96B"; // warmer night-gold
 
 export default {
   light: {
-    text: "#1F2937", // dark neutral text
-    background: "#fbeaccff", // warm cream background
+    // text & backgrounds
+    text: "#2A1E12", // espresso brown (not gray)
+    background: "#FFF4E4", // warm paper / cookbook page
     tint: tintColorLight,
 
-    card: "#fff8ecff",
-    cardLight: "#fefaf2ff",
-    border: "#F1E3C8",
+    // surfaces
+    card: "#FFF9F0", // soft parchment
+    cardLight: "#FFFCF7", // subtle highlight
+    border: "#EAD9BF", // linen edge
 
-    primary: "#F4A938", // buttons / highlights
-    secondary: "#FFD166", // chips, accents
-    muted: "#9CA3AF",
+    // accents
+    primary: tintColorLight, // honey gold
+    secondary: "#E6A84A", // baked caramel
+    muted: "#9C8B73", // warm stone (not gray)
 
-    tabIconDefault: "#C9B08A",
+    // tab bar
+    tabIconDefault: "#B9A07A", // muted wheat
     tabIconSelected: tintColorLight,
+    tabIconActive: "#3A2612", // dark roasted coffee
   },
+
   dark: {
-    text: "#FFF7E6",
-    background: "#1F1B16",
+    // text & backgrounds
+    text: "#FFF3DE", // warm cream text
+    background: "#1C1813", // dark kitchen at night
     tint: tintColorDark,
 
-    card: "#2A241C",
-    cardLight: "#3A3126",
+    // surfaces
+    card: "#262017", // dark wood
+    cardLight: "#2F281D", // raised surface
     border: "#3A3126",
 
-    primary: "#F6C453",
-    secondary: "#FFD166",
-    muted: "#A8A29E",
+    // accents
+    primary: tintColorDark,
+    secondary: "#E8B95B",
+    muted: "#B4A68A", // warm clay
 
-    tabIconDefault: "#A68C5A",
+    // tab bar
+    tabIconDefault: "#9F8A60",
     tabIconSelected: tintColorDark,
+    tabIconActive: "#FFF6E3", // warm butter highlight
   },
 };
