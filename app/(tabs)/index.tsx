@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
+import QuickActionsRow from "@/components/home/QuickActionsRow";
 import TopHeroCarousel from "@/components/home/TopHeroCarousel";
 import Colors from "@/constants/Colors";
 import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
@@ -57,12 +58,7 @@ export default function TabOneScreen() {
           style={[styles.editPlanButton, { backgroundColor: c.card }]}
         />
       </View>
-      <View style={styles.actionsBlock}>
-        <StyledButton
-          title={t("createRecipe.screenTitle")}
-          onPress={() => router.push("../pages/recipes/createRecipe")}
-        />
-      </View>
+      <QuickActionsRow />
     </ScrollViewContainer>
   );
 }
@@ -74,6 +70,8 @@ const styles = StyleSheet.create({
   },
   actionsBlock: {
     marginTop: 24,
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   editPlanWrap: {
     width: "110%",
@@ -90,5 +88,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     alignContent: "center",
     alignItems: "center",
+  },
+  addRecipeText: {
+    textAlign: "center",
+    marginTop: 8,
+    fontSize: 14,
   },
 });

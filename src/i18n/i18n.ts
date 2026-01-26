@@ -70,6 +70,11 @@ const resources = {
         swap: "Swap",
         clear: "Clear",
         back: "Back",
+        add: "Add",
+        plan: "Plan",
+        favorites: "Favorites",
+        list: "List",
+        shopping: "Shopping",
       },
       home: {
         todaysMealPlan: "Today's meal plan",
@@ -154,6 +159,11 @@ const resources = {
         swap: "Byt",
         clear: "Ryd",
         back: "Tilbage",
+        add: "Tilføj",
+        plan: "Planlæg",
+        favorites: "Favoritter",
+        list: "Liste",
+        shopping: "Indkøb",
       },
       home: {
         todaysMealPlan: "Dagens måltidsplan",
