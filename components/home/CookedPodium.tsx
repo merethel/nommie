@@ -1,16 +1,24 @@
 import { Text, View } from "@/components/Themed";
 import React, { useEffect, useMemo, useRef } from "react";
-import { Animated, StyleSheet } from "react-native";
+import {
+    Animated,
+    Image,
+    Pressable,
+    View as RNView,
+    StyleSheet,
+} from "react-native";
 
 export type PodiumItem = {
   id: string;
   title: string;
   cookedCount: number;
+  photoUri?: string;
 };
 
 type Props = {
-  items: PodiumItem[]; // expects top 3 (or fewer)
+  items: PodiumItem[]; // already sorted desc
   title?: string;
+  onPressItem?: (item: PodiumItem) => void;
 };
 
 type Slot = {
@@ -21,7 +29,11 @@ type Slot = {
 // visual order: 2nd (left), 1st (center), 3rd (right)
 const ORDER: Array<1 | 2 | 3> = [2, 1, 3];
 
-export default function CookedPodium({ items, title = "Most cooked" }: Props) {
+export default function CookedPodium({
+  items,
+  title = "Most cooked",
+  onPressItem,
+}: Props) {
   const slots: Slot[] = useMemo(() => {
     const first = items[0];
     const second = items[1];
@@ -31,31 +43,21 @@ export default function CookedPodium({ items, title = "Most cooked" }: Props) {
       2: second,
       3: third,
     };
-
     return ORDER.map((rank) => ({
       rank: rank as 1 | 2 | 3,
       item: byRank[rank],
     }));
   }, [items]);
 
-  // target heights for podium blocks
-  const heightsByRank = useMemo(() => ({ 1: 140, 2: 110, 3: 90 }), []);
-  const anims = useRef(
-    ORDER.map(() => ({
-      // 0 -> 1
-      t: new Animated.Value(0),
-    })),
-  ).current;
+  const heightsByRank = useMemo(() => ({ 1: 150, 2: 120, 3: 100 }), []);
+  const anims = useRef(ORDER.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
-    // reset
-    anims.forEach((a) => a.t.setValue(0));
-
-    // staggered "reveal"
+    anims.forEach((a) => a.setValue(0));
     Animated.stagger(
-      120,
+      140,
       anims.map((a) =>
-        Animated.spring(a.t, {
+        Animated.spring(a, {
           toValue: 1,
           useNativeDriver: true,
           friction: 7,
@@ -71,61 +73,110 @@ export default function CookedPodium({ items, title = "Most cooked" }: Props) {
     <View style={styles.wrap}>
       <Text style={styles.header}>{title}</Text>
 
-      <View style={styles.row}>
+      {/* Podium */}
+      <RNView style={styles.row}>
         {slots.map((slot, idx) => {
-          const a = anims[idx].t;
+          const a = anims[idx];
           const blockHeight = heightsByRank[slot.rank];
 
-          // animation: rise + scale + fade
           const translateY = a.interpolate({
             inputRange: [0, 1],
-            outputRange: [28, 0],
-          });
-          const scaleY = a.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.6, 1],
+            outputRange: [30, 0],
           });
           const opacity = a.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 1],
           });
+          const scale = a.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.92, 1],
+          });
+
+          const pressableDisabled = !slot.item || !onPressItem;
 
           return (
-            <View key={slot.rank} style={styles.slot}>
-              {/* label above block */}
+            <RNView key={slot.rank} style={styles.slot}>
+              {/* Avatar (recipe image) */}
               <Animated.View
                 style={[
-                  styles.labelWrap,
-                  { opacity, transform: [{ translateY }] },
+                  styles.avatarWrap,
+                  { opacity, transform: [{ translateY }, { scale }] },
                 ]}
               >
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{slot.rank}</Text>
-                </View>
+                <Pressable
+                  disabled={pressableDisabled}
+                  onPress={() => slot.item && onPressItem?.(slot.item)}
+                  style={styles.avatarPress}
+                >
+                  {slot.item?.photoUri ? (
+                    <Image
+                      source={{ uri: slot.item.photoUri }}
+                      style={styles.avatarImg}
+                    />
+                  ) : (
+                    <RNView style={styles.avatarFallback}>
+                      <Text style={styles.avatarFallbackText}>{slot.rank}</Text>
+                    </RNView>
+                  )}
+                </Pressable>
 
-                <Text numberOfLines={1} style={styles.recipeTitle}>
-                  {slot.item?.title ?? "—"}
-                </Text>
-                <Text style={styles.countText}>
-                  {slot.item ? `${slot.item.cookedCount}x` : ""}
-                </Text>
+                <RNView style={styles.meta}>
+                  <Text numberOfLines={1} style={styles.recipeTitle}>
+                    {slot.item?.title ?? "—"}
+                  </Text>
+                  <Text style={styles.countText}>
+                    {slot.item ? `${slot.item.cookedCount}x` : ""}
+                  </Text>
+                </RNView>
               </Animated.View>
 
-              {/* podium block */}
+              {/* Podium block */}
               <Animated.View
                 style={[
                   styles.block,
                   {
                     height: blockHeight,
                     opacity,
-                    transform: [{ translateY }, { scaleY }],
+                    transform: [{ translateY }, { scale }],
                   },
                 ]}
-              />
-            </View>
+              >
+                <RNView style={styles.rankBadge}>
+                  <Text style={styles.rankBadgeText}>{slot.rank}</Text>
+                </RNView>
+              </Animated.View>
+            </RNView>
           );
         })}
-      </View>
+      </RNView>
+
+      {/* Clickable list underneath */}
+      <RNView style={styles.list}>
+        {items.map((it, idx) => (
+          <Pressable
+            key={it.id}
+            onPress={() => onPressItem?.(it)}
+            style={({ pressed }) => [
+              styles.listRow,
+              pressed && styles.listRowPressed,
+            ]}
+          >
+            <RNView style={styles.listLeft}>
+              <Text style={styles.listIndex}>{idx + 1}</Text>
+              {it.photoUri ? (
+                <Image source={{ uri: it.photoUri }} style={styles.listThumb} />
+              ) : (
+                <RNView style={styles.listThumbFallback} />
+              )}
+              <Text numberOfLines={1} style={styles.listTitle}>
+                {it.title}
+              </Text>
+            </RNView>
+
+            <Text style={styles.listCount}>{it.cookedCount}x</Text>
+          </Pressable>
+        ))}
+      </RNView>
     </View>
   );
 }
@@ -143,35 +194,51 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     opacity: 0.9,
   },
+
   row: {
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
     gap: 10,
     paddingTop: 6,
+    marginBottom: 14,
   },
   slot: {
     flex: 1,
     alignItems: "center",
   },
-  labelWrap: {
-    width: "100%",
+
+  avatarWrap: {
     alignItems: "center",
     marginBottom: 10,
-    paddingHorizontal: 4,
+    width: "100%",
   },
-  badge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+  avatarPress: {
+    borderRadius: 28,
+    overflow: "hidden",
+  },
+  avatarImg: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+  },
+  avatarFallback: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 6,
     opacity: 0.9,
   },
-  badgeText: {
+  avatarFallbackText: {
     fontWeight: "900",
-    fontSize: 12,
+    fontSize: 16,
+  },
+  meta: {
+    marginTop: 8,
+    alignItems: "center",
+    paddingHorizontal: 6,
+    width: "100%",
   },
   recipeTitle: {
     fontSize: 12,
@@ -185,9 +252,77 @@ const styles = StyleSheet.create({
     marginTop: 2,
     opacity: 0.7,
   },
+
   block: {
     width: "100%",
     borderRadius: 14,
     opacity: 0.95,
+    justifyContent: "flex-start",
+    paddingTop: 10,
+    paddingHorizontal: 10,
+  },
+  rankBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.9,
+    alignSelf: "center",
+  },
+  rankBadgeText: {
+    fontWeight: "900",
+    fontSize: 12,
+  },
+
+  list: {
+    gap: 8,
+  },
+  listRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    opacity: 0.92,
+  },
+  listRowPressed: {
+    opacity: 0.7,
+  },
+  listLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+    paddingRight: 12,
+  },
+  listIndex: {
+    width: 18,
+    textAlign: "center",
+    fontWeight: "900",
+    opacity: 0.7,
+  },
+  listThumb: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+  },
+  listThumbFallback: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    opacity: 0.3,
+  },
+  listTitle: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "800",
+    opacity: 0.9,
+  },
+  listCount: {
+    fontSize: 13,
+    fontWeight: "900",
+    opacity: 0.75,
   },
 });

@@ -7,6 +7,7 @@ export type TopCookedRecipe = {
   id: string;
   title: string;
   cookedCount: number;
+  photoUri?: string;
 };
 
 async function readRecipes(): Promise<Recipe[]> {
@@ -25,11 +26,11 @@ export async function getTopCookedRecipes(
   const recipes = await readRecipes();
   if (!recipes.length) return [];
 
-  // Load counts (simple + safe; fine for typical “recipe list” sizes)
   const withCounts = await Promise.all(
     recipes.map(async (r) => ({
       id: r.id,
       title: r.title ?? "",
+      photoUri: r.photoUri ?? "",
       cookedCount: await getCookedCount(r.id),
     })),
   );

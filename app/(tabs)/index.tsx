@@ -80,6 +80,16 @@ export default function TabOneScreen() {
         <CookedPodium
           items={topCooked}
           title={t("recipes.mostCooked") || "Most cooked"}
+          onPressItem={(item) =>
+            router.push({
+              pathname: "/pages/recipes/recipeInfo",
+              params: {
+                id: item.id,
+                title: item.title,
+                photoUri: item.photoUri ?? "",
+              },
+            })
+          }
         />
       )}
     </ScrollViewContainer>
