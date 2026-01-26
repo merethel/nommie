@@ -45,15 +45,7 @@ export function RecipeCard({
       onPress={() =>
         router.push({
           pathname: "/pages/recipes/recipeInfo",
-          params: {
-            id,
-            title,
-            description: description ?? "",
-            tags: JSON.stringify(tags),
-            ingredients: JSON.stringify(ingredients),
-            instructions,
-            photoUri: photoUri ?? "", // ✅ no hardcoded path
-          },
+          params: { id },
         })
       }
     >

@@ -8,7 +8,6 @@ import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { syncTodayMealPlanRecipe } from "@/utils/mealPlan/mealPlanStorage";
-import { parseStringListParam } from "@/utils/parseStringListParam";
 import {
   decrementCookedCount,
   getCookedCount,
@@ -18,7 +17,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet } from "react-native";
 
 async function readRecipes(): Promise<Recipe[]> {
@@ -51,56 +56,28 @@ function snapshotsEqual(a: any, b: any) {
 }
 
 export default function RecipeInfo() {
-  const params = useLocalSearchParams<{
-    id?: string;
-    title?: string;
-    description?: string;
-    tags?: string;
-    ingredients?: string;
-    instructions?: string;
-    photoUri?: string;
-    isFavorite?: string;
-  }>();
-
+  // ✅ only pass { id } when navigating
+  const params = useLocalSearchParams<{ id?: string }>();
   const recipeId = params.id ?? "";
 
-  const initialIngredients = useMemo(
-    () => parseStringListParam(params.ingredients),
-    [params.ingredients],
-  );
-  const initialTags = useMemo(
-    () => parseStringListParam(params.tags),
-    [params.tags],
-  );
-  const initialInstructions = useMemo(
-    () => parseStringListParam(params.instructions),
-    [params.instructions],
-  );
-
+  // ✅ initial is a shell; real data comes from storage
   const initial = useMemo(
     () => ({
       id: recipeId,
-      photoUri: params.photoUri ?? "",
-      title: params.title ?? "",
-      description: params.description ?? "",
-      tags: initialTags,
-      ingredients: initialIngredients,
-      instructions: initialInstructions,
+      photoUri: "",
+      title: "",
+      description: "",
+      tags: [] as string[],
+      ingredients: [] as string[],
+      instructions: [] as string[],
     }),
-    [
-      recipeId,
-      params.photoUri,
-      params.title,
-      params.description,
-      initialTags,
-      initialIngredients,
-      initialInstructions,
-    ],
+    [recipeId],
   );
 
   const editor = useRecipeEditor(initial);
 
-  const [isFavorite, setIsFavorite] = useState(params.isFavorite === "true");
+  const [storedRecipe, setStoredRecipe] = useState<Recipe | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [cookedCount, setCookedCount] = useState<number>(0);
 
   // snapshot when you START editing (used for Cancel + dirty check)
@@ -112,6 +89,7 @@ export default function RecipeInfo() {
     ? !snapshotsEqual(editSnapshot, snapshotFromEditor(editor))
     : false;
 
+  // ✅ Load recipe + cooked count on focus
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
@@ -120,23 +98,48 @@ export default function RecipeInfo() {
         if (!recipeId) return;
 
         const recipes = await readRecipes();
-        const stored = recipes.find((r) => r.id === recipeId);
-
+        const stored = recipes.find((r) => r.id === recipeId) ?? null;
         const count = await getCookedCount(recipeId);
 
-        if (!cancelled) {
-          setIsFavorite(
-            stored ? !!stored.isFavorite : params.isFavorite === "true",
-          );
-          setCookedCount(count);
-        }
+        if (cancelled) return;
+
+        setStoredRecipe(stored);
+        setIsFavorite(!!stored?.isFavorite);
+        setCookedCount(count);
       })();
 
       return () => {
         cancelled = true;
       };
-    }, [recipeId, params.isFavorite]),
+    }, [recipeId]),
   );
+
+  // ✅ Hydrate the editor ONCE per loaded recipe (prevents infinite re-render loop)
+  const hydratedKeyRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!storedRecipe) return;
+    if (editor.isEditing) return;
+
+    // If you have storedRecipe.updatedAt, use that instead.
+    // This key just needs to change when the stored recipe changes.
+    const key = `${storedRecipe.id}:${storedRecipe.createdAt ?? ""}:${
+      storedRecipe.title ?? ""
+    }:${storedRecipe.photoUri ?? ""}`;
+
+    if (hydratedKeyRef.current === key) return;
+    hydratedKeyRef.current = key;
+
+    editor.setTitle(storedRecipe.title ?? "");
+    editor.setDescription(storedRecipe.description ?? "");
+    editor.setPhotoUri(storedRecipe.photoUri ?? "");
+    editor.setTagsText((storedRecipe.tags ?? []).join("\n"));
+    editor.setIngredientsText((storedRecipe.ingredients ?? []).join("\n"));
+    editor.setInstructionsText((storedRecipe.instructions ?? []).join("\n"));
+
+    setEditSnapshot(snapshotFromEditor(editor));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storedRecipe, editor.isEditing]);
 
   const toggleFavorite = useCallback(async () => {
     if (!recipeId) return;
@@ -176,20 +179,20 @@ export default function RecipeInfo() {
   }, [recipeId, isFavorite, editor]);
 
   const onStartEdit = useCallback(() => {
+    // optional: mark hydration as "locked" during editing
+    hydratedKeyRef.current = "editing";
     setEditSnapshot(snapshotFromEditor(editor));
     editor.setIsEditing(true);
   }, [editor]);
 
   const onCancelEdit = useCallback(() => {
     editor.reset();
-    // snapshot the reset state (next tick so state is applied)
     setTimeout(() => setEditSnapshot(snapshotFromEditor(editor)), 0);
   }, [editor]);
 
   const onSaveEdit = useCallback(async () => {
     await editor.save();
 
-    // update today's meal plan ref if it points to this recipe
     await syncTodayMealPlanRecipe({
       id: recipeId,
       title: editor.title,
@@ -198,6 +201,10 @@ export default function RecipeInfo() {
 
     setEditSnapshot(snapshotFromEditor(editor));
     editor.setIsEditing(false);
+
+    // refresh stored recipe so UI reflects latest saved data
+    const recipes = await readRecipes();
+    setStoredRecipe(recipes.find((r) => r.id === recipeId) ?? null);
   }, [editor, recipeId]);
 
   const onCookedPlus = useCallback(async () => {
@@ -269,7 +276,6 @@ export default function RecipeInfo() {
           onToggleFavorite={toggleFavorite}
         />
 
-        {/* ✅ bottom counter (hidden while editing) */}
         {!editor.isEditing && (
           <CookedCounter
             value={cookedCount}

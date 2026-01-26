@@ -2,7 +2,6 @@ import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { DEFAULT_RECIPE_IMAGE, PLAN_MEAL_IMAGE } from "@/constants/images";
-import { getRecipeById } from "@/utils/recipes/recipeStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, {
@@ -60,21 +59,10 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
   // ✅ auto-advance: pause while user interacts
   const isInteractingRef = useRef(false);
 
-  const openRecipe = async (id: string) => {
-    const recipe = await getRecipeById(id);
-    if (!recipe) return;
-
+  const openRecipe = (id: string) => {
     router.push({
       pathname: "/pages/recipes/recipeInfo",
-      params: {
-        id: recipe.id,
-        title: recipe.title,
-        description: recipe.description ?? "",
-        tags: JSON.stringify(recipe.tags ?? []),
-        ingredients: JSON.stringify(recipe.ingredients ?? []),
-        instructions: JSON.stringify(recipe.instructions ?? []),
-        photoUri: recipe.photoUri ?? "",
-      },
+      params: { id },
     });
   };
 

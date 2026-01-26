@@ -2,7 +2,6 @@ import SmallCard from "@/components/common/SmallCard";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
-import { getRecipeById } from "@/utils/recipes/recipeStorage";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
 import {
@@ -43,23 +42,10 @@ export default function TodaysMealPlan({ meals }: Props) {
     }
   };
 
-  const openRecipe = async (id: string) => {
-    const recipe = await getRecipeById(id);
-    if (!recipe) return;
-
+  const openRecipe = (id: string) => {
     router.push({
       pathname: "/pages/recipes/recipeInfo",
-      params: {
-        id: recipe.id,
-        title: recipe.title,
-        description: recipe.description ?? "",
-        tags: JSON.stringify(recipe.tags ?? []),
-        ingredients: JSON.stringify(recipe.ingredients ?? []),
-        instructions: JSON.stringify(recipe.instructions ?? []),
-        photoUri:
-          recipe.photoUri ??
-          "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
-      },
+      params: { id },
     });
   };
 

@@ -83,11 +83,7 @@ export default function TabOneScreen() {
           onPressItem={(item) =>
             router.push({
               pathname: "/pages/recipes/recipeInfo",
-              params: {
-                id: item.id,
-                title: item.title,
-                photoUri: item.photoUri ?? "",
-              },
+              params: { id: item.id },
             })
           }
         />
