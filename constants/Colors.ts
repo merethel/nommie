@@ -22,6 +22,8 @@ export default {
     tabIconDefault: "#B9A07A", // muted wheat
     tabIconSelected: tintColorLight,
     tabIconActive: "#3A2612", // dark roasted coffee
+
+    accent: "#D97706",
   },
 
   dark: {
@@ -44,5 +46,7 @@ export default {
     tabIconDefault: "#9F8A60",
     tabIconSelected: tintColorDark,
     tabIconActive: "#FFF6E3", // warm butter highlight
+
+    accent: "#D97706",
   },
 };

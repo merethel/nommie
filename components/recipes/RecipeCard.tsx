@@ -17,6 +17,7 @@ type Props = {
   photoUri?: string;
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
+  onAddToMealPlan?: (id: string) => void;
 };
 
 export function RecipeCard({
@@ -29,6 +30,7 @@ export function RecipeCard({
   photoUri,
   isFavorite,
   onToggleFavorite,
+  onAddToMealPlan,
 }: Props) {
   const [expanded] = useState(false);
   const scheme = useColorScheme() ?? "light";
@@ -50,32 +52,45 @@ export function RecipeCard({
       }
     >
       <View style={styles.header}>
-        {/* ✅ ALWAYS render image */}
         <Image
           source={photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE}
           style={styles.image}
           resizeMode="cover"
         />
-
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={4} ellipsizeMode="tail">
             {title}
           </Text>
 
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(id);
-            }}
-            hitSlop={10}
-            style={styles.heartBtn}
-          >
-            <Ionicons
-              name={isFavorite ? "heart" : "heart-outline"}
-              size={18}
-              color={isFavorite ? "#E11D48" : c.text}
-            />
-          </TouchableOpacity>
+          <View style={styles.actions}>
+            {!!onAddToMealPlan && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onAddToMealPlan(id);
+                }}
+                hitSlop={10}
+                style={styles.iconBtn}
+              >
+                <Ionicons name="add-circle-outline" size={20} color={c.text} />
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(id);
+              }}
+              hitSlop={10}
+              style={styles.iconBtn}
+            >
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={20}
+                color={isFavorite ? "#E11D48" : c.text}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {!!description?.trim() && (
@@ -148,6 +163,16 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   heartBtn: {
+    padding: 6,
+    flexShrink: 0,
+  },
+  actions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "transparent",
+  },
+  iconBtn: {
     padding: 6,
     flexShrink: 0,
   },

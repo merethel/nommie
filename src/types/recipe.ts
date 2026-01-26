@@ -10,4 +10,5 @@ export type Recipe = {
   createdAt: number;
   isFavorite?: boolean;
   cookedCount?: number;
+  favoritedAt?: number;
 };

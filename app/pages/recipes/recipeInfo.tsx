@@ -150,8 +150,10 @@ export default function RecipeInfo() {
     const recipes = await readRecipes();
     const idx = recipes.findIndex((r) => r.id === recipeId);
 
+    const favoritedAt = next ? Date.now() : undefined;
+
     if (idx >= 0) {
-      recipes[idx] = { ...recipes[idx], isFavorite: next };
+      recipes[idx] = { ...recipes[idx], isFavorite: next, favoritedAt };
     } else {
       recipes.push({
         id: recipeId,
@@ -172,6 +174,7 @@ export default function RecipeInfo() {
         photoUri: editor.photoUri,
         createdAt: Date.now(),
         isFavorite: next,
+        favoritedAt,
       });
     }
 
