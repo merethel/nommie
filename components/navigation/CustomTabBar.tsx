@@ -126,6 +126,19 @@ export default function CustomTabBar({
             style={StyleSheet.absoluteFill}
           />
 
+          {/* TINT OVERLAY */}
+          <View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor:
+                  scheme === "dark"
+                    ? "rgba(0,0,0,0.25)" // darker glass
+                    : "rgba(255, 214, 138, 0.26)", // milky/light glass
+              },
+            ]}
+          />
           {/* Masked bar border (won't cross notch) */}
           <View pointerEvents="none" style={styles.barBorder} />
         </MaskedView>
