@@ -120,7 +120,15 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
               >
                 {!hasRecipe && (
                   <RNView style={styles.emptyOverlay}>
-                    <Ionicons name="add" size={54} color="#fff" />
+                    <Ionicons
+                      name="add"
+                      size={64}
+                      color="#fff"
+                      shadowColor="#000"
+                      shadowOffset={{ width: 0, height: 2 }}
+                      shadowOpacity={0.8}
+                      shadowRadius={4}
+                    />
                   </RNView>
                 )}
               </ImageBackground>
@@ -210,7 +218,6 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 999,
-    marginTop: 14,
   },
 
   dotActive: { backgroundColor: "#fff" },
@@ -218,7 +225,6 @@ const styles = StyleSheet.create({
 
   bottomDivider: {
     height: StyleSheet.hairlineWidth,
-    marginTop: 26,
     opacity: 0.9,
   },
 });

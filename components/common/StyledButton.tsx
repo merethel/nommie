@@ -1,21 +1,29 @@
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 
 type ButtonSize = "small" | "default";
 
 type StyledButtonProps = {
   title: string;
   onPress?: () => void;
-  size?: ButtonSize; // ✅ add size
+  size?: ButtonSize;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function StyledButton({
   title,
   onPress,
   size = "default",
+  style,
 }: StyledButtonProps) {
   return (
     <TouchableOpacity
-      style={[styles.button, size === "small" && styles.smallButton]}
+      style={[styles.button, size === "small" && styles.smallButton, style]}
       onPress={onPress}
     >
       <Text style={[styles.buttonText, size === "small" && styles.smallText]}>

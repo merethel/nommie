@@ -4,10 +4,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet } from "react-native";
+import { StyleSheet, useColorScheme } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import TopHeroCarousel from "@/components/home/TopHeroCarousel";
+import Colors from "@/constants/Colors";
 import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
 
 type MealSlot = {
@@ -22,6 +23,8 @@ export default function TabOneScreen() {
     { type: "lunch" },
     { type: "dinner" },
   ]);
+
+  const c = Colors[useColorScheme() ?? "light"];
 
   const loadToday = useCallback(async () => {
     const plan = await readTodayMealPlan();
@@ -47,6 +50,13 @@ export default function TabOneScreen() {
       <View style={{ flex: 1, marginHorizontal: -16 }}>
         <TopHeroCarousel meals={meals} height={240} />
       </View>
+      <View style={styles.editPlanWrap}>
+        <StyledButton
+          title={t("meals.changeTodaysMealPlan") || "Edit meal plan"}
+          onPress={() => router.push("/pages/mealPlan")}
+          style={[styles.editPlanButton, { backgroundColor: c.card }]}
+        />
+      </View>
       <View style={styles.actionsBlock}>
         <StyledButton
           title={t("createRecipe.screenTitle")}
@@ -64,5 +74,21 @@ const styles = StyleSheet.create({
   },
   actionsBlock: {
     marginTop: 24,
+  },
+  editPlanWrap: {
+    width: "110%",
+    padding: 0,
+    marginTop: -13,
+    marginLeft: -16,
+  },
+  editPlanButton: {
+    padding: 0,
+    margin: 0,
+    width: "100%",
+    marginTop: 0,
+    borderRadius: 0,
+    textAlign: "center",
+    alignContent: "center",
+    alignItems: "center",
   },
 });
