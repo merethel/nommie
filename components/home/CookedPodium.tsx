@@ -1,4 +1,5 @@
 import { Text, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import React, { useEffect, useMemo, useRef } from "react";
 import {
     Animated,
@@ -6,6 +7,7 @@ import {
     Pressable,
     View as RNView,
     StyleSheet,
+    useColorScheme,
 } from "react-native";
 
 export type PodiumItem = {
@@ -16,7 +18,7 @@ export type PodiumItem = {
 };
 
 type Props = {
-  items: PodiumItem[]; // already sorted desc
+  items: PodiumItem[]; // sorted desc
   title?: string;
   onPressItem?: (item: PodiumItem) => void;
 };
@@ -34,28 +36,37 @@ export default function CookedPodium({
   title = "Most cooked",
   onPressItem,
 }: Props) {
+  const scheme = useColorScheme() ?? "light";
+  const c = Colors[scheme];
+
   const slots: Slot[] = useMemo(() => {
     const first = items[0];
     const second = items[1];
     const third = items[2];
+
     const byRank: Record<number, PodiumItem | undefined> = {
       1: first,
       2: second,
       3: third,
     };
+
     return ORDER.map((rank) => ({
       rank: rank as 1 | 2 | 3,
       item: byRank[rank],
     }));
   }, [items]);
 
-  const heightsByRank = useMemo(() => ({ 1: 150, 2: 120, 3: 100 }), []);
+  // podium geometry (image sits ON the podium, with bars underneath)
+  const podiumHeights = useMemo(() => ({ 1: 60, 2: 46, 3: 38 }), []);
+  const baseHeight = 16; // base strip under all columns
+
   const anims = useRef(ORDER.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     anims.forEach((a) => a.setValue(0));
+
     Animated.stagger(
-      140,
+      300,
       anims.map((a) =>
         Animated.spring(a, {
           toValue: 1,
@@ -70,87 +81,140 @@ export default function CookedPodium({
   if (!items.length) return null;
 
   return (
-    <View style={styles.wrap}>
-      <Text style={styles.header}>{title}</Text>
+    <View
+      style={[
+        styles.wrap,
+        { backgroundColor: c.cardLight, borderColor: c.border },
+      ]}
+    >
+      <Text style={[styles.header, { color: c.text }]}>{title}</Text>
 
-      {/* Podium */}
-      <RNView style={styles.row}>
-        {slots.map((slot, idx) => {
-          const a = anims[idx];
-          const blockHeight = heightsByRank[slot.rank];
+      {/* PODIUM */}
+      <RNView style={styles.podiumStage}>
+        {/* columns */}
+        <RNView style={styles.columns}>
+          {slots.map((slot, idx) => {
+            const a = anims[idx];
 
-          const translateY = a.interpolate({
-            inputRange: [0, 1],
-            outputRange: [30, 0],
-          });
-          const opacity = a.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1],
-          });
-          const scale = a.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.92, 1],
-          });
+            const translateY = a.interpolate({
+              inputRange: [0, 1],
+              outputRange: [18, 0],
+            });
+            const opacity = a.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+            });
+            const scale = a.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.96, 1],
+            });
 
-          const pressableDisabled = !slot.item || !onPressItem;
+            const pressableDisabled = !slot.item || !onPressItem;
+            const columnHeight = podiumHeights[slot.rank];
 
-          return (
-            <RNView key={slot.rank} style={styles.slot}>
-              {/* Avatar (recipe image) */}
-              <Animated.View
-                style={[
-                  styles.avatarWrap,
-                  { opacity, transform: [{ translateY }, { scale }] },
-                ]}
-              >
-                <Pressable
-                  disabled={pressableDisabled}
-                  onPress={() => slot.item && onPressItem?.(slot.item)}
-                  style={styles.avatarPress}
+            // theme-ish podium colors
+            const columnColor =
+              slot.rank === 1
+                ? c.primary
+                : slot.rank === 2
+                  ? c.secondary
+                  : c.tint;
+
+            return (
+              <RNView key={slot.rank} style={styles.columnSlot}>
+                {/* Image + small label (sits above column) */}
+                <Animated.View
+                  style={[
+                    styles.winnerWrap,
+                    { opacity, transform: [{ translateY }, { scale }] },
+                  ]}
                 >
-                  {slot.item?.photoUri ? (
-                    <Image
-                      source={{ uri: slot.item.photoUri }}
-                      style={styles.avatarImg}
-                    />
-                  ) : (
-                    <RNView style={styles.avatarFallback}>
-                      <Text style={styles.avatarFallbackText}>{slot.rank}</Text>
-                    </RNView>
-                  )}
-                </Pressable>
+                  <Pressable
+                    disabled={pressableDisabled}
+                    onPress={() => slot.item && onPressItem?.(slot.item)}
+                    style={[
+                      styles.avatarPress,
+                      { borderColor: c.border, backgroundColor: c.card },
+                    ]}
+                  >
+                    {slot.item?.photoUri ? (
+                      <Image
+                        source={{ uri: slot.item.photoUri }}
+                        style={styles.avatarImg}
+                      />
+                    ) : (
+                      <RNView
+                        style={[
+                          styles.avatarFallback,
+                          { backgroundColor: c.card },
+                        ]}
+                      >
+                        <Text
+                          style={[styles.avatarFallbackText, { color: c.text }]}
+                        >
+                          {slot.rank}
+                        </Text>
+                      </RNView>
+                    )}
+                  </Pressable>
 
-                <RNView style={styles.meta}>
-                  <Text numberOfLines={1} style={styles.recipeTitle}>
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.winnerTitle, { color: c.text }]}
+                  >
                     {slot.item?.title ?? "—"}
                   </Text>
-                  <Text style={styles.countText}>
+                  <Text style={[styles.winnerCount, { color: c.muted }]}>
                     {slot.item ? `${slot.item.cookedCount}x` : ""}
                   </Text>
-                </RNView>
-              </Animated.View>
+                </Animated.View>
 
-              {/* Podium block */}
-              <Animated.View
-                style={[
-                  styles.block,
-                  {
-                    height: blockHeight,
-                    opacity,
-                    transform: [{ translateY }, { scale }],
-                  },
-                ]}
-              >
-                <RNView style={styles.rankBadge}>
-                  <Text style={styles.rankBadgeText}>{slot.rank}</Text>
-                </RNView>
-              </Animated.View>
-            </RNView>
-          );
-        })}
+                {/* Podium column (bar) */}
+                <Animated.View
+                  style={[
+                    styles.column,
+                    {
+                      height: columnHeight,
+                      backgroundColor: columnColor,
+                      opacity,
+                      transform: [{ translateY }, { scale }],
+                    },
+                  ]}
+                >
+                  <RNView
+                    style={[
+                      styles.rankPill,
+                      { backgroundColor: c.card, borderColor: c.border },
+                    ]}
+                  >
+                    <Text style={[styles.rankPillText, { color: c.text }]}>
+                      {slot.rank}
+                    </Text>
+                  </RNView>
+
+                  {/* subtle top edge like a “cap” */}
+                  <RNView
+                    style={[
+                      styles.cap,
+                      { backgroundColor: c.cardLight, opacity: 0.22 },
+                    ]}
+                  />
+                </Animated.View>
+              </RNView>
+            );
+          })}
+        </RNView>
+
+        {/* base strip under all columns to make it feel like a real podium */}
+        <RNView
+          style={[
+            styles.baseStrip,
+            { height: baseHeight, backgroundColor: c.border, opacity: 0.6 },
+          ]}
+        />
       </RNView>
 
-      {/* Clickable list underneath */}
+      {/* CLICKABLE LIST */}
       <RNView style={styles.list}>
         {items.map((it, idx) => (
           <Pressable
@@ -158,22 +222,54 @@ export default function CookedPodium({
             onPress={() => onPressItem?.(it)}
             style={({ pressed }) => [
               styles.listRow,
-              pressed && styles.listRowPressed,
+              {
+                backgroundColor: c.card,
+                borderColor: c.border,
+                opacity: pressed ? 0.75 : 1,
+              },
             ]}
           >
             <RNView style={styles.listLeft}>
-              <Text style={styles.listIndex}>{idx + 1}</Text>
+              <RNView
+                style={[
+                  styles.listIndexPill,
+                  { backgroundColor: c.cardLight, borderColor: c.border },
+                ]}
+              >
+                <Text style={[styles.listIndexText, { color: c.text }]}>
+                  {idx + 1}
+                </Text>
+              </RNView>
+
               {it.photoUri ? (
                 <Image source={{ uri: it.photoUri }} style={styles.listThumb} />
               ) : (
-                <RNView style={styles.listThumbFallback} />
+                <RNView
+                  style={[
+                    styles.listThumbFallback,
+                    { backgroundColor: c.cardLight },
+                  ]}
+                />
               )}
-              <Text numberOfLines={1} style={styles.listTitle}>
+
+              <Text
+                numberOfLines={1}
+                style={[styles.listTitle, { color: c.text }]}
+              >
                 {it.title}
               </Text>
             </RNView>
 
-            <Text style={styles.listCount}>{it.cookedCount}x</Text>
+            <RNView
+              style={[
+                styles.countPill,
+                { backgroundColor: c.cardLight, borderColor: c.border },
+              ]}
+            >
+              <Text style={[styles.listCount, { color: c.text }]}>
+                {it.cookedCount}x
+              </Text>
+            </RNView>
           </Pressable>
         ))}
       </RNView>
@@ -183,100 +279,109 @@ export default function CookedPodium({
 
 const styles = StyleSheet.create({
   wrap: {
-    marginTop: 18,
-    marginHorizontal: 16,
-    padding: 14,
     borderRadius: 18,
+    marginTop: 24,
+    padding: 14,
+    borderWidth: 1,
   },
   header: {
     fontSize: 16,
     fontWeight: "800",
     marginBottom: 10,
-    opacity: 0.9,
+    opacity: 0.95,
   },
 
-  row: {
+  podiumStage: {
+    marginTop: 6,
+    marginBottom: 14,
+  },
+  columns: {
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "space-between",
     gap: 10,
     paddingTop: 6,
-    marginBottom: 14,
   },
-  slot: {
+  columnSlot: {
     flex: 1,
     alignItems: "center",
   },
 
-  avatarWrap: {
+  winnerWrap: {
     alignItems: "center",
-    marginBottom: 10,
     width: "100%",
+    marginBottom: 10,
   },
   avatarPress: {
-    borderRadius: 28,
+    borderRadius: 32,
     overflow: "hidden",
+    borderWidth: 1,
   },
   avatarImg: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   avatarFallback: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
     justifyContent: "center",
-    opacity: 0.9,
   },
   avatarFallbackText: {
     fontWeight: "900",
     fontSize: 16,
   },
-  meta: {
+  winnerTitle: {
     marginTop: 8,
-    alignItems: "center",
-    paddingHorizontal: 6,
-    width: "100%",
-  },
-  recipeTitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "900",
     textAlign: "center",
-    opacity: 0.9,
+    paddingHorizontal: 6,
   },
-  countText: {
+  winnerCount: {
+    marginTop: 2,
     fontSize: 12,
     fontWeight: "800",
-    marginTop: 2,
-    opacity: 0.7,
   },
 
-  block: {
+  column: {
     width: "100%",
     borderRadius: 14,
-    opacity: 0.95,
     justifyContent: "flex-start",
     paddingTop: 10,
-    paddingHorizontal: 10,
+    overflow: "hidden",
   },
-  rankBadge: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+  cap: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 10,
+  },
+  rankPill: {
+    alignSelf: "center",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    opacity: 0.9,
-    alignSelf: "center",
+    borderWidth: 1,
   },
-  rankBadgeText: {
+  rankPillText: {
     fontWeight: "900",
     fontSize: 12,
   },
 
+  baseStrip: {
+    marginTop: 10,
+    width: "100%",
+    borderRadius: 12,
+  },
+
   list: {
-    gap: 8,
+    gap: 10,
   },
   listRow: {
     flexDirection: "row",
@@ -285,10 +390,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 14,
-    opacity: 0.92,
-  },
-  listRowPressed: {
-    opacity: 0.7,
+    borderWidth: 1,
   },
   listLeft: {
     flexDirection: "row",
@@ -297,32 +399,44 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 12,
   },
-  listIndex: {
-    width: 18,
-    textAlign: "center",
+  listIndexPill: {
+    minWidth: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+  },
+  listIndexText: {
     fontWeight: "900",
-    opacity: 0.7,
+    fontSize: 12,
   },
   listThumb: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
   },
   listThumbFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    opacity: 0.3,
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    opacity: 0.7,
   },
   listTitle: {
     flex: 1,
     fontSize: 13,
     fontWeight: "800",
-    opacity: 0.9,
+  },
+  countPill: {
+    paddingHorizontal: 10,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
   },
   listCount: {
     fontSize: 13,
     fontWeight: "900",
-    opacity: 0.75,
   },
 });
