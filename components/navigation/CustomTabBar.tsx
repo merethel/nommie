@@ -142,7 +142,7 @@ export default function CustomTabBar({
             style={[
               StyleSheet.absoluteFillObject,
               {
-                borderWidth: 3,
+                borderWidth: 2,
                 borderColor: "rgba(242,184,75,0.28)",
                 borderRadius: 0,
                 borderBottomLeftRadius: 0,
