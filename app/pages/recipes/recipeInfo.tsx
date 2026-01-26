@@ -3,6 +3,7 @@ import HeaderBackPill from "@/components/navigation/HeaderBackPill";
 import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
+import { Recipe } from "@/src/types/recipe";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { syncTodayMealPlanRecipe } from "@/utils/mealPlan/mealPlanStorage";
 import { parseStringListParam } from "@/utils/parseStringListParam";
@@ -14,18 +15,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
 
 const RECIPES_KEY = "nommie_recipes";
-
-type Recipe = {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  ingredients: string[];
-  instructions: string[];
-  photoUri?: string;
-  createdAt: number;
-  isFavorite?: boolean;
-};
 
 async function readRecipes(): Promise<Recipe[]> {
   const raw = await AsyncStorage.getItem(RECIPES_KEY);

@@ -1,18 +1,7 @@
+import { Recipe } from "@/src/types/recipe";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RECIPES_KEY = "nommie_recipes";
-
-export type Recipe = {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  ingredients: string[];
-  instructions: string[];
-  photoUri?: string;
-  createdAt: number;
-  isFavorite?: boolean;
-};
 
 export async function readRecipes(): Promise<Recipe[]> {
   const raw = await AsyncStorage.getItem(RECIPES_KEY);

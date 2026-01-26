@@ -15,20 +15,10 @@ import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
+import { Recipe } from "@/src/types/recipe";
 import { t } from "i18next";
 
 const RECIPES_KEY = "nommie_recipes";
-
-type Recipe = {
-  id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  ingredients: string[];
-  instructions: string[];
-  createdAt: number;
-  photoUri?: string;
-};
 
 function parseToList(input: string): string[] {
   // supports commas or new lines

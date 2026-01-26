@@ -1,4 +1,5 @@
 // hooks/useRecipeEditor.ts
+import { Recipe } from "@/src/types/recipe";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { t } from "i18next";
@@ -6,17 +7,6 @@ import { useState } from "react";
 import { Alert } from "react-native";
 
 const RECIPES_KEY = "nommie_recipes";
-
-export type Recipe = {
-  id: string;
-  title: string;
-  description?: string;
-  ingredients: string[];
-  instructions: string[];
-  tags: string[];
-  createdAt?: number;
-  photoUri?: string;
-};
 
 export function parseToList(input: string): string[] {
   return input
