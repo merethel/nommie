@@ -2,7 +2,7 @@ import MaskedView from "@react-native-masked-view/masked-view";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import React, { useEffect, useMemo } from "react";
-import { Dimensions, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
@@ -12,41 +12,31 @@ import Animated, {
 import Svg, { Defs, G, Mask, Path, Rect } from "react-native-svg";
 
 import { useColorScheme } from "@/components/useColorScheme";
-import Colors from "@/constants/Colors";
+import {
+  buildNotchMaskPath,
+  buildNotchStrokePath,
+} from "@/utils/navigation/notchPaths";
 
 /* ───────────────────────── constants ───────────────────────── */
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 const BAR_HEIGHT = 64;
-const BAR_RADIUS = 28;
 
 const NOTCH_DEPTH = 50;
+const MAX_NOTCH_WIDTH = 120;
+
 const LIFT_Y = 18;
+
+const BAR_SPRING = { damping: 16, stiffness: 180, mass: 0.6 } as const;
+const LIFT_SPRING = { damping: 14, stiffness: 220, mass: 0.55 } as const;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
-/* ───────────────────────── notch paths ───────────────────────── */
+/* ───────────────────────── types ───────────────────────── */
 
-// Closed path (for mask)
-function buildNotchPath(w: number, h: number) {
-  return `
-    M 0 0
-    C ${w * 0.18} 0, ${w * 0.22} ${h}, ${w * 0.5} ${h}
-    C ${w * 0.78} ${h}, ${w * 0.82} 0, ${w} 0
-    L 0 0
-    Z
-  `;
-}
-
-// Open path (for border stroke only)
-function buildNotchStrokePath(w: number, h: number) {
-  return `
-    M 0 0
-    C ${w * 0.18} 0, ${w * 0.22} ${h}, ${w * 0.5} ${h}
-    C ${w * 0.78} ${h}, ${w * 0.82} 0, ${w} 0
-  `;
-}
+type CustomTabBarProps = BottomTabBarProps & {
+  activeColor?: string;
+  inactiveColor?: string;
+};
 
 /* ───────────────────────── component ───────────────────────── */
 
@@ -57,24 +47,22 @@ export default function CustomTabBar({
   insets,
   activeColor,
   inactiveColor,
-}: BottomTabBarProps & {
-  activeColor?: string;
-  inactiveColor?: string;
-}) {
-  const scheme = useColorScheme() ?? "light";
-  const theme = Colors[scheme];
+}: CustomTabBarProps) {
+  const scheme = (useColorScheme() ?? "light") as "light" | "dark";
+  const { width: barWidth } = useWindowDimensions();
 
-  const finalActiveColor = activeColor ?? theme.tabIconActive;
-  const finalInactiveColor = inactiveColor ?? theme.tabIconDefault;
-
-  const tabCount = state.routes.length;
-  const barWidth = SCREEN_WIDTH;
+  const tabCount = state.routes.length || 1;
   const slotWidth = barWidth / tabCount;
 
-  const notchW = Math.min(120, slotWidth * 1.15);
+  const finalActiveColor = activeColor ?? (scheme === "dark" ? "#fff" : "#000");
+  const finalInactiveColor =
+    inactiveColor ??
+    (scheme === "dark" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)");
 
-  const notchPath = useMemo(
-    () => buildNotchPath(notchW, NOTCH_DEPTH),
+  const notchW = Math.min(MAX_NOTCH_WIDTH, slotWidth * 1.15);
+
+  const notchMaskPath = useMemo(
+    () => buildNotchMaskPath(notchW, NOTCH_DEPTH),
     [notchW],
   );
 
@@ -83,23 +71,26 @@ export default function CustomTabBar({
     [notchW],
   );
 
-  const x = useSharedValue(slotWidth * state.index + slotWidth / 2);
+  // Active center X
+  const centerX = useSharedValue(slotWidth * state.index + slotWidth / 2);
 
   useEffect(() => {
-    x.value = withSpring(slotWidth * state.index + slotWidth / 2, {
-      damping: 16,
-      stiffness: 180,
-      mass: 0.6,
-    });
-  }, [state.index, slotWidth]);
+    centerX.value = withSpring(
+      slotWidth * state.index + slotWidth / 2,
+      BAR_SPRING,
+    );
+  }, [state.index, slotWidth, centerX]);
 
   const notchGProps = useAnimatedProps(() => ({
-    transform: [{ translateX: x.value - notchW / 2 }],
+    transform: [{ translateX: centerX.value - notchW / 2 }],
   }));
 
   const notchBorderStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: x.value - notchW / 2 }],
+    transform: [{ translateX: centerX.value - notchW / 2 }],
   }));
+
+  const blurIntensity = scheme === "dark" ? 45 : 55;
+  const blurTint = scheme === "dark" ? "dark" : "light";
 
   return (
     <View
@@ -109,18 +100,17 @@ export default function CustomTabBar({
       <View style={[styles.container, { width: barWidth, height: BAR_HEIGHT }]}>
         {/* Blur + border + notch cutout */}
         <MaskedView
-          style={[styles.barShell, { borderRadius: 0 }]}
+          style={styles.barShell}
           maskElement={
             <Svg width={barWidth} height={BAR_HEIGHT}>
               <Defs>
                 <Mask id="cut">
                   <Rect width={barWidth} height={BAR_HEIGHT} fill="white" />
                   <AnimatedG animatedProps={notchGProps}>
-                    <Path d={notchPath} fill="black" />
+                    <Path d={notchMaskPath} fill="black" />
                   </AnimatedG>
                 </Mask>
               </Defs>
-
               <Rect
                 width={barWidth}
                 height={BAR_HEIGHT}
@@ -131,25 +121,13 @@ export default function CustomTabBar({
           }
         >
           <BlurView
-            intensity={scheme === "dark" ? 45 : 55}
-            tint={scheme === "dark" ? "dark" : "light"}
+            intensity={blurIntensity}
+            tint={blurTint}
             style={StyleSheet.absoluteFill}
           />
 
-          {/* Masked bar border */}
-          <View
-            pointerEvents="none"
-            style={[
-              StyleSheet.absoluteFillObject,
-              {
-                borderWidth: 2,
-                borderColor: "rgba(242,184,75,0.28)",
-                borderRadius: 0,
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-              },
-            ]}
-          />
+          {/* Masked bar border (won't cross notch) */}
+          <View pointerEvents="none" style={styles.barBorder} />
         </MaskedView>
 
         {/* Curved notch border (no top line) */}
@@ -207,6 +185,15 @@ export default function CustomTabBar({
 
 /* ───────────────────────── tab button ───────────────────────── */
 
+type TabButtonProps = {
+  width: number;
+  focused: boolean;
+  onPress: () => void;
+  renderIcon?: BottomTabBarProps["descriptors"][string]["options"]["tabBarIcon"];
+  activeColor: string;
+  inactiveColor: string;
+};
+
 function TabButton({
   width,
   focused,
@@ -214,23 +201,12 @@ function TabButton({
   renderIcon,
   activeColor,
   inactiveColor,
-}: {
-  width: number;
-  focused: boolean;
-  onPress: () => void;
-  renderIcon?: BottomTabBarProps["descriptors"][string]["options"]["tabBarIcon"];
-  activeColor: string;
-  inactiveColor: string;
-}) {
+}: TabButtonProps) {
   const lift = useSharedValue(0);
 
   useEffect(() => {
-    lift.value = withSpring(focused ? 1 : 0, {
-      damping: 14,
-      stiffness: 220,
-      mass: 0.55,
-    });
-  }, [focused]);
+    lift.value = withSpring(focused ? 1 : 0, LIFT_SPRING);
+  }, [focused, lift]);
 
   const liftStyle = useAnimatedStyle(() => ({
     transform: [
@@ -279,6 +255,15 @@ const styles = StyleSheet.create({
   barShell: {
     ...StyleSheet.absoluteFillObject,
     overflow: "hidden",
+  },
+  barBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 2,
+    borderColor: "rgba(242,184,75,0.28)",
+    // keep square if that's what you want
+    borderRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
   notchBorder: {
     position: "absolute",
