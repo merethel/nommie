@@ -50,6 +50,10 @@ const resources = {
         description: "A collection of your favorite recipes.",
         ingredients: "Ingredients list",
         instructions: "Cooking instructions",
+        searchPlaceholder: "Search recipes...",
+        searchText: "Text",
+        searchTags: "Tags",
+        searchIngredients: "Ingredients",
       },
       common: {
         showMore: "Show more",
@@ -108,6 +112,10 @@ const resources = {
         description: "En samling af dine yndlingsopskrifter.",
         ingredients: "Ingrediensliste",
         instructions: "Fremgangsmåde",
+        searchPlaceholder: "Søg opskrifter...",
+        searchText: "Tekst",
+        searchTags: "Tags",
+        searchIngredients: "Ingredienser",
       },
       common: {
         showMore: "Vis mere",

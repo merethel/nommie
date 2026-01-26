@@ -29,6 +29,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
+    marginTop: 20,
     paddingTop: 60,
     padding: 16,
     gap: 12,

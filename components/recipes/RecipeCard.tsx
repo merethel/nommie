@@ -12,7 +12,7 @@ type Props = {
   description?: string;
   tags: string[];
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   photoUri?: string;
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;

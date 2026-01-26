@@ -1,11 +1,18 @@
+// TabTwoScreen.tsx (updated)
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { StyleSheet } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text } from "@/components/Themed";
 import { t } from "i18next";
 import { RecipeCard } from "../../components/recipes/RecipeCard";
+
+import RecipeSearchBar, {
+  RecipeSearchScope,
+} from "@/components/recipes/RecipeSearchBar";
+import { filterRecipes } from "@/utils/recipes/searchRecipes";
 
 const RECIPES_KEY = "nommie_recipes";
 
@@ -15,7 +22,7 @@ type Recipe = {
   description: string;
   tags: string[];
   ingredients: string[];
-  instructions: string;
+  instructions: string[];
   photoUri?: string;
   createdAt: number;
   isFavorite?: boolean;
@@ -23,6 +30,13 @@ type Recipe = {
 
 export default function TabTwoScreen() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [query, setQuery] = useState("");
+
+  const [scope, setScope] = useState<RecipeSearchScope>({
+    text: true,
+    tags: true,
+    ingredients: true,
+  });
 
   const loadRecipes = useCallback(async () => {
     const json = await AsyncStorage.getItem(RECIPES_KEY);
@@ -31,12 +45,10 @@ export default function TabTwoScreen() {
   }, []);
 
   const toggleFavorite = useCallback(async (id: string) => {
-    // optimistic UI update
     setRecipes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, isFavorite: !r.isFavorite } : r)),
     );
 
-    // persist
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
 
@@ -47,20 +59,35 @@ export default function TabTwoScreen() {
     await AsyncStorage.setItem(RECIPES_KEY, JSON.stringify(next));
   }, []);
 
-  // Reload every time you navigate back to this tab
   useFocusEffect(
     useCallback(() => {
       loadRecipes();
     }, [loadRecipes]),
   );
 
+  const filtered = useMemo(
+    () => filterRecipes(recipes, query, scope),
+    [recipes, query, scope],
+  );
+
   return (
-    <ScrollViewContainer>
+    <ScrollViewContainer contentContainerStyle={styles.container}>
       <Stack.Screen />
-      {recipes.length === 0 ? (
-        <Text>{t("recipes.empty")}</Text>
+
+      <RecipeSearchBar
+        query={query}
+        onChangeQuery={setQuery}
+        scope={scope}
+        onChangeScope={setScope}
+        resultCount={filtered.length}
+      />
+
+      {filtered.length === 0 ? (
+        <Text>
+          {t("recipes.emptySearch") || "No recipes match your search."}
+        </Text>
       ) : (
-        recipes.map((r) => (
+        filtered.map((r) => (
           <RecipeCard
             key={r.id}
             id={r.id}
@@ -78,3 +105,10 @@ export default function TabTwoScreen() {
     </ScrollViewContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+});
