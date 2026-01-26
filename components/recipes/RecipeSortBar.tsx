@@ -1,4 +1,5 @@
 import { Text } from "@/components/Themed";
+import { t } from "i18next";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -25,18 +26,18 @@ export default function RecipeSortBar({
   return (
     <View style={styles.row}>
       <Pill
-        label="Newest"
+        label={t("recipes.sortNewest") || "Newest"}
         active={value === "newest"}
         onPress={() => handlePress("newest")}
       />
       <Pill
-        label="A–Z"
+        label={t("recipes.sortAZ") || "A–Z"}
         active={value === "az"}
         onPress={() => handlePress("az")}
       />
       {showMostCooked && (
         <Pill
-          label="Most cooked"
+          label={t("recipes.sortMostCooked") || "Most cooked"}
           active={value === "mostCooked"}
           onPress={() => handlePress("mostCooked")}
         />

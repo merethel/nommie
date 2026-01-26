@@ -60,6 +60,9 @@ const resources = {
         turnOnFilter: "Turn on at least one filter to search.",
         cookedCount: "Times cooked",
         mostCooked: "Most cooked",
+        sortNewest: "Newest",
+        sortAZ: "A–Z",
+        sortMostCooked: "Most cooked",
       },
       common: {
         showMore: "Show more",
@@ -151,6 +154,9 @@ const resources = {
         turnOnFilter: "Tænd for mindst ét filter for at søge.",
         cookedCount: "Antal gange lavet",
         mostCooked: "Mest lavede opskrifter",
+        sortNewest: "Nyeste",
+        sortAZ: "A–Z",
+        sortMostCooked: "Mest lavede",
       },
       common: {
         showMore: "Vis mere",
