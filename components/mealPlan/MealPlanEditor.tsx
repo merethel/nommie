@@ -1,18 +1,20 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
+import MealPlanSlotCard from "@/components/mealPlan/MealPlanSlotCard";
+import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeSearchBar from "@/components/recipes/RecipeSearchBar";
+
 import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
 
-import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import {
-    clearMealPlanDay,
     DayMealPlan,
     MealType,
     PlannedRecipeRef,
@@ -20,30 +22,33 @@ import {
     writeMealPlanDay,
 } from "@/utils/mealPlan/mealPlanStorage";
 
-function slotLabel(t: (k: string) => string, type: MealType) {
-  if (type === "breakfast") return t("meals.breakfast") || "Breakfast";
-  if (type === "lunch") return t("meals.lunch") || "Lunch";
-  return t("meals.dinner") || "Dinner";
-}
-
 function plansEqual(a: DayMealPlan, b: DayMealPlan) {
   return JSON.stringify(a ?? {}) === JSON.stringify(b ?? {});
 }
 
-type Props = {
-  dateKey: string; // YYYY-MM-DD
-  headerRightSlot?: (args: {
-    isDirty: boolean;
-    onSave: () => void;
-  }) => React.ReactNode;
-  showClearDay?: boolean;
-};
+function slotMeta(t: (k: string) => string, type: MealType) {
+  if (type === "breakfast") {
+    return {
+      label: t("meals.breakfast") || "Breakfast",
+      icon: "sunny-outline" as const,
+      emptyHint: t("meals.chooseRecipe") || "Choose recipe",
+    };
+  }
+  if (type === "lunch") {
+    return {
+      label: t("meals.lunch") || "Lunch",
+      icon: "leaf-outline" as const,
+      emptyHint: t("meals.chooseRecipe") || "Choose recipe",
+    };
+  }
+  return {
+    label: t("meals.dinner") || "Dinner",
+    icon: "restaurant-outline" as const,
+    emptyHint: t("meals.chooseRecipe") || "Choose recipe",
+  };
+}
 
-export default function MealPlanEditor({
-  dateKey,
-  headerRightSlot,
-  showClearDay = true,
-}: Props) {
+export default function MealPlanEditor({ dateKey }: { dateKey: string }) {
   const { t } = useTranslation();
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -52,6 +57,7 @@ export default function MealPlanEditor({
   const [draftPlan, setDraftPlan] = useState<DayMealPlan>({});
 
   const [activeSlot, setActiveSlot] = useState<MealType | null>(null);
+
   const [query, setQuery] = useState("");
 
   const isDirty = useMemo(
@@ -79,6 +85,29 @@ export default function MealPlanEditor({
     [recipes, query],
   );
 
+  const onOpenOrPick = useCallback(
+    (type: MealType) => {
+      const slot = (draftPlan as any)[type] as
+        | PlannedRecipeRef
+        | null
+        | undefined;
+
+      // If filled: open recipe info
+      if (slot?.id) {
+        router.push({
+          pathname: "/pages/recipes/recipeInfo",
+          params: { id: slot.id },
+        });
+        return;
+      }
+
+      // If empty: open picker
+      setActiveSlot(type);
+      setQuery("");
+    },
+    [draftPlan],
+  );
+
   const onPickRecipe = useCallback(
     (recipe: Recipe) => {
       if (!activeSlot) return;
@@ -100,16 +129,18 @@ export default function MealPlanEditor({
     [activeSlot],
   );
 
-  const onClearSlot = useCallback(
-    (type: MealType) => {
-      setDraftPlan((prev) => ({
-        ...prev,
-        [type]: null,
-      }));
-      if (activeSlot === type) setActiveSlot(null);
-    },
-    [activeSlot],
-  );
+  const onClearSlot = useCallback((type: MealType) => {
+    setDraftPlan((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
+    setActiveSlot((prev) => (prev === type ? null : prev));
+  }, []);
+
+  const onSwapSlot = useCallback((type: MealType) => {
+    setActiveSlot(type);
+    setQuery("");
+  }, []);
 
   const onCancelChanges = useCallback(() => {
     setDraftPlan(savedPlan);
@@ -124,79 +155,63 @@ export default function MealPlanEditor({
     setQuery("");
   }, [dateKey, draftPlan]);
 
-  const onClearDay = useCallback(async () => {
-    await clearMealPlanDay(dateKey);
-    setSavedPlan({});
-    setDraftPlan({});
-    setActiveSlot(null);
-    setQuery("");
-  }, [dateKey]);
-
   return (
     <View style={{ gap: 12 }}>
-      {/* optional header right injection (for Stack header in pages) */}
-      {headerRightSlot?.({ isDirty, onSave: onSaveChanges })}
+      {/* Slots */}
+      <MealPlanSlotCard
+        icon={slotMeta(t, "breakfast").icon}
+        label={slotMeta(t, "breakfast").label}
+        recipe={draftPlan.breakfast ?? null}
+        hint={
+          draftPlan.breakfast
+            ? t("meals.tapToView") || "Tap to view"
+            : slotMeta(t, "breakfast").emptyHint
+        }
+        onPress={() => onOpenOrPick("breakfast")}
+        onSwap={draftPlan.breakfast ? () => onSwapSlot("breakfast") : undefined}
+        onClear={
+          draftPlan.breakfast ? () => onClearSlot("breakfast") : undefined
+        }
+      />
 
-      <View style={styles.card}>
-        {(["breakfast", "lunch", "dinner"] as MealType[]).map((type) => {
-          const slot = (draftPlan as any)[type] ?? null;
-          const selected = activeSlot === type;
+      <MealPlanSlotCard
+        icon={slotMeta(t, "lunch").icon}
+        label={slotMeta(t, "lunch").label}
+        recipe={draftPlan.lunch ?? null}
+        hint={
+          draftPlan.lunch
+            ? t("meals.tapToView") || "Tap to view"
+            : slotMeta(t, "lunch").emptyHint
+        }
+        onPress={() => onOpenOrPick("lunch")}
+        onSwap={draftPlan.lunch ? () => onSwapSlot("lunch") : undefined}
+        onClear={draftPlan.lunch ? () => onClearSlot("lunch") : undefined}
+      />
 
-          return (
-            <View key={type} style={styles.slotRow}>
-              <Text style={styles.slotLabel}>{slotLabel(t, type)}</Text>
+      <MealPlanSlotCard
+        icon={slotMeta(t, "dinner").icon}
+        label={slotMeta(t, "dinner").label}
+        recipe={draftPlan.dinner ?? null}
+        hint={
+          draftPlan.dinner
+            ? t("meals.tapToView") || "Tap to view"
+            : slotMeta(t, "dinner").emptyHint
+        }
+        onPress={() => onOpenOrPick("dinner")}
+        onSwap={draftPlan.dinner ? () => onSwapSlot("dinner") : undefined}
+        onClear={draftPlan.dinner ? () => onClearSlot("dinner") : undefined}
+      />
 
-              {slot ? (
-                <View style={styles.slotFilled}>
-                  <Text style={styles.slotTitle}>{slot.title}</Text>
-
-                  <View style={styles.slotActions}>
-                    <Pressable onPress={() => setActiveSlot(type)}>
-                      <Text style={styles.actionText}>
-                        {t("common.swap") || "Swap"}
-                      </Text>
-                    </Pressable>
-
-                    <Pressable onPress={() => onClearSlot(type)}>
-                      <Text style={[styles.actionText, styles.dangerText]}>
-                        {t("common.clear") || "Clear"}
-                      </Text>
-                    </Pressable>
-                  </View>
-                </View>
-              ) : (
-                <Pressable onPress={() => setActiveSlot(type)}>
-                  <Text style={styles.actionText}>
-                    {t("meals.chooseRecipe") || "Choose recipe"}
-                  </Text>
-                </Pressable>
-              )}
-
-              {selected && (
-                <Text style={styles.pickingHint}>
-                  {t("meals.pickingFor") || "Picking for"} {slotLabel(t, type)}
-                </Text>
-              )}
-            </View>
-          );
-        })}
-      </View>
-
-      {showClearDay && (
-        <View style={{ flexDirection: "row", gap: 8 }}>
+      {/* Dirty actions */}
+      {isDirty && (
+        <View style={styles.actionsRow}>
           <HeaderPillButton
             label={t("common.cancel") || "Cancel"}
             onPress={onCancelChanges}
-            disabled={!isDirty}
           />
           <HeaderPillButton
             label={t("common.save") || "Save"}
             onPress={onSaveChanges}
-            disabled={!isDirty}
-          />
-          <HeaderPillButton
-            label={t("common.clear") || "Clear day"}
-            onPress={onClearDay}
           />
         </View>
       )}
@@ -250,39 +265,31 @@ export default function MealPlanEditor({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    gap: 14,
+  actionsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 2,
   },
-  slotRow: { gap: 6 },
-  slotLabel: { fontSize: 14, fontWeight: "700", opacity: 0.8 },
-  slotFilled: { gap: 6 },
-  slotTitle: { fontSize: 16, fontWeight: "600" },
-  slotActions: { flexDirection: "row", gap: 16 },
-  actionText: { fontSize: 13, fontWeight: "600", opacity: 0.7 },
-  dangerText: { opacity: 0.9 },
-  pickingHint: { fontSize: 12, opacity: 0.6, marginTop: 2 },
 
   pickerCard: {
-    marginTop: 4,
+    marginTop: 6,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: "#ddd",
     gap: 10,
   },
-  pickerTitle: { fontSize: 16, fontWeight: "700" },
+  pickerTitle: { fontSize: 16, fontWeight: "800" },
   helperText: { opacity: 0.7, paddingVertical: 8 },
+
   pickRow: {
     paddingVertical: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ddd",
   },
-  pickTitle: { fontSize: 15, fontWeight: "600" },
+  pickTitle: { fontSize: 15, fontWeight: "700" },
   pickSubtitle: { fontSize: 12, opacity: 0.7, marginTop: 2 },
+
   closePickerBtn: { paddingVertical: 10, alignSelf: "flex-start" },
-  closePickerText: { fontSize: 13, fontWeight: "700", opacity: 0.7 },
+  closePickerText: { fontSize: 13, fontWeight: "800", opacity: 0.7 },
 });
