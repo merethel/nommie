@@ -3,6 +3,7 @@ import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
+import { syncTodayMealPlanRecipe } from "@/utils/mealPlan/mealPlanStorage";
 import { parseStringListParam } from "@/utils/parseStringListParam";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
@@ -189,9 +190,17 @@ export default function RecipeInfo() {
 
   const onSaveEdit = useCallback(async () => {
     await editor.save();
+
+    // ✅ update today's meal plan ref if it points to this recipe
+    await syncTodayMealPlanRecipe({
+      id: recipeId,
+      title: editor.title,
+      photoUri: editor.photoUri,
+    });
+
     setEditSnapshot(snapshotFromEditor(editor));
     editor.setIsEditing(false);
-  }, [editor]);
+  }, [editor, recipeId]);
 
   return (
     <>

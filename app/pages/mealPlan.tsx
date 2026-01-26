@@ -99,7 +99,11 @@ export default function MealPlanScreen() {
     (recipe: Recipe) => {
       if (!activeSlot) return;
 
-      const ref: PlannedRecipeRef = { id: recipe.id, title: recipe.title };
+      const ref: PlannedRecipeRef = {
+        id: recipe.id,
+        title: recipe.title,
+        photoUri: recipe.photoUri ?? "",
+      };
 
       setDraftPlan((prev) => ({
         ...prev,

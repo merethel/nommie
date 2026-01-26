@@ -5,6 +5,7 @@ export type MealType = "breakfast" | "lunch" | "dinner";
 export type PlannedRecipeRef = {
   id: string;
   title: string;
+  photoUri?: string;
 };
 
 export type DayMealPlan = {
@@ -50,4 +51,29 @@ export async function setTodayMealSlot(
   const next: DayMealPlan = { ...current, [type]: recipe };
   await writeTodayMealPlan(next);
   return next;
+}
+export async function syncTodayMealPlanRecipe(updated: {
+  id: string;
+  title: string;
+  photoUri?: string;
+}) {
+  const plan = await readTodayMealPlan();
+
+  let changed = false;
+
+  (["breakfast", "lunch", "dinner"] as const).forEach((slot) => {
+    const ref = plan[slot];
+    if (ref?.id === updated.id) {
+      plan[slot] = {
+        ...ref,
+        title: updated.title,
+        photoUri: updated.photoUri ?? "",
+      };
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    await writeTodayMealPlan(plan);
+  }
 }
