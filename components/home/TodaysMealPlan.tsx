@@ -1,9 +1,17 @@
+import SmallCard from "@/components/common/SmallCard";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import { getRecipeById } from "@/utils/recipes/recipeStorage";
 import { router } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet } from "react-native";
+import {
+  View as RNView,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+} from "react-native";
+import AddMealCard from "../common/AddMealCard";
 
 export type MealType = "breakfast" | "lunch" | "dinner";
 
@@ -21,6 +29,8 @@ type Props = {
 
 export default function TodaysMealPlan({ meals }: Props) {
   const { t } = useTranslation();
+  const scheme = useColorScheme() ?? "light";
+  const c = Colors[scheme];
 
   const labelFor = (type: MealType) => {
     switch (type) {
@@ -54,38 +64,39 @@ export default function TodaysMealPlan({ meals }: Props) {
   };
 
   return (
-    <View style={styles.card}>
-      {meals.map((meal) => (
-        <View key={meal.type} style={styles.mealRow}>
-          <Text style={styles.mealLabel}>{labelFor(meal.type)}</Text>
+    <View
+      style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}
+    >
+      {/* Horizontal cards */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {meals.map((meal) => (
+          <RNView key={meal.type} style={styles.mealCard}>
+            <Text style={styles.mealLabel}>{labelFor(meal.type)}</Text>
 
-          {meal.recipe ? (
-            <View style={styles.mealFilled}>
-              <Text style={styles.recipeTitle}>{meal.recipe.title}</Text>
+            {meal.recipe ? (
+              <SmallCard
+                title={meal.recipe.title}
+                onPress={() => openRecipe(meal.recipe!.id)}
+              />
+            ) : (
+              <AddMealCard onPress={() => router.push("/pages/mealPlan")} />
+            )}
+          </RNView>
+        ))}
+      </ScrollView>
 
-              <View style={styles.actions}>
-                <Pressable onPress={() => openRecipe(meal.recipe!.id)}>
-                  <Text style={styles.actionText}>
-                    {t("common.open") || "Open"}
-                  </Text>
-                </Pressable>
-
-                <Pressable onPress={() => router.push("/pages/mealPlan")}>
-                  <Text style={styles.actionText}>
-                    {t("common.swap") || "Swap"}
-                  </Text>
-                </Pressable>
-              </View>
-            </View>
-          ) : (
-            <StyledButton
-              title={t("meals.planMeal") || "Plan meal"}
-              onPress={() => router.push("/pages/mealPlan")}
-              size="small"
-            />
-          )}
-        </View>
-      ))}
+      {/* Change plan button */}
+      <RNView style={styles.footer}>
+        <StyledButton
+          title={t("meals.changeTodaysMealPlan") || "Change today's meal plan"}
+          onPress={() => router.push("/pages/mealPlan")}
+          size="small"
+        />
+      </RNView>
     </View>
   );
 }
@@ -95,13 +106,28 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#ddd",
     gap: 14,
   },
-  mealRow: { gap: 6 },
-  mealLabel: { fontSize: 14, fontWeight: "700", opacity: 0.8 },
-  mealFilled: { gap: 6 },
-  recipeTitle: { fontSize: 16, fontWeight: "600" },
-  actions: { flexDirection: "row", gap: 16 },
-  actionText: { fontSize: 13, fontWeight: "600", opacity: 0.7 },
+
+  scrollContent: {
+    flexDirection: "row",
+    gap: 20,
+    paddingRight: 8,
+  },
+
+  mealCard: {
+    width: 160,
+    gap: 8,
+  },
+
+  mealLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    opacity: 0.8,
+    textAlign: "center",
+  },
+
+  footer: {
+    marginTop: 8,
+  },
 });
