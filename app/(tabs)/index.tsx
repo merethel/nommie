@@ -7,7 +7,6 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
-import CookedPodium from "@/components/home/CookedPodium";
 import QuickActionsRow from "@/components/home/QuickActionsRow";
 import TopHeroCarousel from "@/components/home/TopHeroCarousel";
 
@@ -80,19 +79,6 @@ export default function TabOneScreen() {
       </View>
 
       <QuickActionsRow />
-
-      {topCooked.length > 0 && (
-        <CookedPodium
-          items={topCooked}
-          title={t("recipes.mostCooked") || "Most cooked"}
-          onPressItem={(item) =>
-            router.push({
-              pathname: "/pages/recipes/recipeInfo",
-              params: { id: item.id },
-            })
-          }
-        />
-      )}
     </ScrollViewContainer>
   );
 }
