@@ -7,18 +7,35 @@ import { Pressable, StyleSheet } from "react-native";
 type Props = {
   label: string;
   onPress: () => void;
+  disabled?: boolean;
+  size?: "small" | "medium" | "large";
 };
 
-export default function HeaderPillButton({ label, onPress }: Props) {
+export default function HeaderPillButton({
+  label,
+  onPress,
+  disabled,
+  size,
+}: Props) {
   const scheme = useColorScheme() ?? "light";
   const c = Colors[scheme];
 
   return (
     <Pressable
       onPress={onPress}
+      disabled={disabled}
       hitSlop={10}
       style={[
         styles.pill,
+        disabled && { opacity: 0.4 },
+        size === "small" && {
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+        },
+        size === "large" && {
+          paddingHorizontal: 18,
+          paddingVertical: 9,
+        },
         {
           backgroundColor: c.card, // stays white-ish in light, darker in dark mode
           borderColor: c.border,

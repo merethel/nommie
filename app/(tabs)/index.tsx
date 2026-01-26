@@ -53,7 +53,7 @@ export default function TabOneScreen() {
       </View>
       <View style={styles.editPlanWrap}>
         <StyledButton
-          title={t("meals.changeTodaysMealPlan") || "Edit meal plan"}
+          title={t("meals.todaysMealPlan") || "Edit meal plan"}
           onPress={() => router.push("/pages/mealPlan")}
           style={[styles.editPlanButton, { backgroundColor: c.card }]}
         />

@@ -90,7 +90,7 @@ export default function TodaysMealPlan({ meals }: Props) {
       {/* Change plan button */}
       <RNView style={styles.footer}>
         <StyledButton
-          title={t("meals.changeTodaysMealPlan") || "Change today's meal plan"}
+          title={t("meals.todaysMealPlan") || "Change today's meal plan"}
           onPress={() => router.push("/pages/mealPlan")}
           size="small"
         />

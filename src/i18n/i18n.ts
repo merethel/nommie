@@ -58,6 +58,7 @@ const resources = {
         oneResult: "result",
         manyResults: "results",
         turnOnFilter: "Turn on at least one filter to search.",
+        cookedCount: "Times cooked",
       },
       common: {
         showMore: "Show more",
@@ -88,7 +89,7 @@ const resources = {
         chooseRecipe: "Choose recipe",
         pickRecipe: "Pick a recipe",
         pickingFor: "Picking for",
-        changeTodaysMealPlan: "Change today's meal plan",
+        todaysMealPlan: "See today's meal plan",
       },
     },
   },
@@ -147,6 +148,7 @@ const resources = {
         oneResult: "resultat",
         manyResults: "resultater",
         turnOnFilter: "Tænd for mindst ét filter for at søge.",
+        cookedCount: "Antal gange lavet",
       },
       common: {
         showMore: "Vis mere",
@@ -174,7 +176,7 @@ const resources = {
         lunch: "Frokost",
         dinner: "Aftensmad",
         planTitle: "Måltidsplan",
-        changeTodaysMealPlan: "Skift dagens måltidsplan",
+        todaysMealPlan: "Se dagens måltidsplan",
       },
     },
   },

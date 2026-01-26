@@ -3,14 +3,20 @@ import HeaderBackPill from "@/components/navigation/HeaderBackPill";
 import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
+import CookedCounter from "@/components/recipes/CookedCounter";
 import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { syncTodayMealPlanRecipe } from "@/utils/mealPlan/mealPlanStorage";
 import { parseStringListParam } from "@/utils/parseStringListParam";
+import {
+  decrementCookedCount,
+  getCookedCount,
+  incrementCookedCount,
+} from "@/utils/recipes/recipeCooked";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -57,7 +63,6 @@ export default function RecipeInfo() {
   }>();
 
   const recipeId = params.id ?? "";
-  const router = useRouter();
 
   const initialIngredients = useMemo(
     () => parseStringListParam(params.ingredients),
@@ -96,6 +101,7 @@ export default function RecipeInfo() {
   const editor = useRecipeEditor(initial);
 
   const [isFavorite, setIsFavorite] = useState(params.isFavorite === "true");
+  const [cookedCount, setCookedCount] = useState<number>(0);
 
   // snapshot when you START editing (used for Cancel + dirty check)
   const [editSnapshot, setEditSnapshot] = useState(() =>
@@ -116,10 +122,13 @@ export default function RecipeInfo() {
         const recipes = await readRecipes();
         const stored = recipes.find((r) => r.id === recipeId);
 
+        const count = await getCookedCount(recipeId);
+
         if (!cancelled) {
           setIsFavorite(
             stored ? !!stored.isFavorite : params.isFavorite === "true",
           );
+          setCookedCount(count);
         }
       })();
 
@@ -180,7 +189,7 @@ export default function RecipeInfo() {
   const onSaveEdit = useCallback(async () => {
     await editor.save();
 
-    // ✅ update today's meal plan ref if it points to this recipe
+    // update today's meal plan ref if it points to this recipe
     await syncTodayMealPlanRecipe({
       id: recipeId,
       title: editor.title,
@@ -191,12 +200,23 @@ export default function RecipeInfo() {
     editor.setIsEditing(false);
   }, [editor, recipeId]);
 
+  const onCookedPlus = useCallback(async () => {
+    if (!recipeId) return;
+    const next = await incrementCookedCount(recipeId);
+    setCookedCount(next);
+  }, [recipeId]);
+
+  const onCookedMinus = useCallback(async () => {
+    if (!recipeId) return;
+    const next = await decrementCookedCount(recipeId);
+    setCookedCount(next);
+  }, [recipeId]);
+
   return (
     <>
       <Stack.Screen
         options={{
           title: "",
-
           headerLeft: () =>
             editor.isEditing && isDirty ? (
               <HeaderPillButton
@@ -206,7 +226,6 @@ export default function RecipeInfo() {
             ) : (
               <HeaderBackPill />
             ),
-
           headerRight: () =>
             editor.isEditing ? (
               isDirty ? (
@@ -249,6 +268,16 @@ export default function RecipeInfo() {
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
         />
+
+        {/* ✅ bottom counter (hidden while editing) */}
+        {!editor.isEditing && (
+          <CookedCounter
+            value={cookedCount}
+            onIncrement={onCookedPlus}
+            onDecrement={onCookedMinus}
+            title={t("recipes.cookedCount") || "Times cooked"}
+          />
+        )}
       </ScrollViewContainer>
     </>
   );
