@@ -204,18 +204,11 @@ export default function CookedPodium({
             );
           })}
         </RNView>
-
-        {/* base strip under all columns to make it feel like a real podium */}
-        <RNView
-          style={[
-            styles.baseStrip,
-            { height: baseHeight, backgroundColor: c.border, opacity: 0.6 },
-          ]}
-        />
       </RNView>
 
       {/* CLICKABLE LIST */}
-      <RNView style={styles.list}>
+
+      {/* <RNView style={styles.list}>
         {items.map((it, idx) => (
           <Pressable
             key={it.id}
@@ -272,7 +265,7 @@ export default function CookedPodium({
             </RNView>
           </Pressable>
         ))}
-      </RNView>
+      </RNView> */}
     </View>
   );
 }
