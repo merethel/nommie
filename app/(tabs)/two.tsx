@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { StyleSheet } from "react-native";
+import { Keyboard, Pressable, StyleSheet } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text } from "@/components/Themed";
@@ -37,7 +37,6 @@ export default function TabTwoScreen() {
     ingredients: true,
   });
 
-  // derived UI state
   const allOff = !scope.text && !scope.tags && !scope.ingredients;
   const hasQuery = query.trim().length > 0;
 
@@ -48,12 +47,10 @@ export default function TabTwoScreen() {
   }, []);
 
   const toggleFavorite = useCallback(async (id: string) => {
-    // optimistic UI
     setRecipes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, isFavorite: !r.isFavorite } : r)),
     );
 
-    // persist
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
     const next = data.map((r) =>
@@ -75,45 +72,44 @@ export default function TabTwoScreen() {
   );
 
   return (
-    <ScrollViewContainer contentContainerStyle={styles.container}>
-      <Stack.Screen />
+    <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+      <ScrollViewContainer
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <Stack.Screen />
 
-      {/* Search + filters */}
-      <RecipeSearchBar
-        query={query}
-        onChangeQuery={setQuery}
-        scope={scope}
-        onChangeScope={setScope}
-        resultCount={filtered.length}
-      />
+        <RecipeSearchBar
+          query={query}
+          onChangeQuery={setQuery}
+          scope={scope}
+          onChangeScope={setScope}
+          resultCount={filtered.length}
+        />
 
-      {/* Results / empty states */}
-      {allOff && hasQuery ? (
-        <Text style={styles.helperText}>
-          {t("recipes.turnOnFilter") ||
-            "Choose at least one filter (Text / Tags / Ingredients)."}
-        </Text>
-      ) : filtered.length === 0 ? (
-        <Text>
-          {t("recipes.emptySearch") || "No recipes found for your search."}
-        </Text>
-      ) : (
-        filtered.map((r) => (
-          <RecipeCard
-            key={r.id}
-            id={r.id}
-            title={r.title}
-            description={r.description}
-            tags={r.tags}
-            ingredients={r.ingredients}
-            instructions={r.instructions}
-            photoUri={r.photoUri}
-            isFavorite={!!r.isFavorite}
-            onToggleFavorite={toggleFavorite}
-          />
-        ))
-      )}
-    </ScrollViewContainer>
+        {allOff && hasQuery ? (
+          <Text style={styles.helperText}>{t("recipes.turnOnFilter")}</Text>
+        ) : filtered.length === 0 ? (
+          <Text>{t("recipes.emptySearch")}</Text>
+        ) : (
+          filtered.map((r) => (
+            <RecipeCard
+              key={r.id}
+              id={r.id}
+              title={r.title}
+              description={r.description}
+              tags={r.tags}
+              ingredients={r.ingredients}
+              instructions={r.instructions}
+              photoUri={r.photoUri}
+              isFavorite={!!r.isFavorite}
+              onToggleFavorite={toggleFavorite}
+            />
+          ))
+        )}
+      </ScrollViewContainer>
+    </Pressable>
   );
 }
 
