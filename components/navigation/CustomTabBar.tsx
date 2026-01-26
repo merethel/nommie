@@ -26,8 +26,9 @@ const LIFT_Y = 18;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
-/* ───────────────────────── notch path (local coords) ───────────────────────── */
-// This is the “bite” shape drawn in its own little box [0..w, 0..h]
+/* ───────────────────────── notch paths ───────────────────────── */
+
+// Closed path (for mask)
 function buildNotchPath(w: number, h: number) {
   return `
     M 0 0
@@ -38,12 +39,14 @@ function buildNotchPath(w: number, h: number) {
   `;
 }
 
-/* ───────────────────────── types ───────────────────────── */
-
-type CustomTabBarProps = BottomTabBarProps & {
-  activeColor?: string;
-  inactiveColor?: string;
-};
+// Open path (for border stroke only)
+function buildNotchStrokePath(w: number, h: number) {
+  return `
+    M 0 0
+    C ${w * 0.18} 0, ${w * 0.22} ${h}, ${w * 0.5} ${h}
+    C ${w * 0.78} ${h}, ${w * 0.82} 0, ${w} 0
+  `;
+}
 
 /* ───────────────────────── component ───────────────────────── */
 
@@ -54,7 +57,10 @@ export default function CustomTabBar({
   insets,
   activeColor,
   inactiveColor,
-}: CustomTabBarProps) {
+}: BottomTabBarProps & {
+  activeColor?: string;
+  inactiveColor?: string;
+}) {
   const scheme = useColorScheme() ?? "light";
   const theme = Colors[scheme];
 
@@ -66,12 +72,17 @@ export default function CustomTabBar({
   const slotWidth = barWidth / tabCount;
 
   const notchW = Math.min(120, slotWidth * 1.15);
+
   const notchPath = useMemo(
     () => buildNotchPath(notchW, NOTCH_DEPTH),
     [notchW],
   );
 
-  // Active center X (within barWidth coordinates)
+  const notchStrokePath = useMemo(
+    () => buildNotchStrokePath(notchW, NOTCH_DEPTH),
+    [notchW],
+  );
+
   const x = useSharedValue(slotWidth * state.index + slotWidth / 2);
 
   useEffect(() => {
@@ -82,23 +93,10 @@ export default function CustomTabBar({
     });
   }, [state.index, slotWidth]);
 
-  // notch left position
-  const notchLeft = useSharedValue(x.value - notchW / 2);
-
-  useEffect(() => {
-    notchLeft.value = withSpring(x.value - notchW / 2, {
-      damping: 16,
-      stiffness: 180,
-      mass: 0.6,
-    });
-  }, [x.value]); // (reanimated value, ok)
-
-  // For SVG we’ll drive translateX via animatedProps (reliable for masks)
   const notchGProps = useAnimatedProps(() => ({
     transform: [{ translateX: x.value - notchW / 2 }],
   }));
 
-  // Border outline can use regular animated style wrapper
   const notchBorderStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: x.value - notchW / 2 }],
   }));
@@ -109,35 +107,24 @@ export default function CustomTabBar({
       pointerEvents="box-none"
     >
       <View style={[styles.container, { width: barWidth, height: BAR_HEIGHT }]}>
-        {/* ✅ TRUE hole: MaskedView uses alpha; this SVG mask produces transparent notch pixels */}
+        {/* Blur + border + notch cutout */}
         <MaskedView
-          style={[styles.barShell, { borderRadius: BAR_RADIUS }]}
+          style={[styles.barShell, { borderRadius: 0 }]}
           maskElement={
             <Svg width={barWidth} height={BAR_HEIGHT}>
               <Defs>
                 <Mask id="cut">
-                  {/* visible area = opaque */}
-                  <Rect
-                    x="0"
-                    y="0"
-                    width={barWidth}
-                    height={BAR_HEIGHT}
-                    fill="white"
-                  />
-                  {/* notch area = transparent (black in SVG mask) */}
+                  <Rect width={barWidth} height={BAR_HEIGHT} fill="white" />
                   <AnimatedG animatedProps={notchGProps}>
                     <Path d={notchPath} fill="black" />
                   </AnimatedG>
                 </Mask>
               </Defs>
 
-              {/* Output alpha for MaskedView: a solid rect with the mask applied */}
               <Rect
-                x="0"
-                y="0"
                 width={barWidth}
                 height={BAR_HEIGHT}
-                fill="black" // color irrelevant; alpha comes from mask
+                fill="black"
                 mask="url(#cut)"
               />
             </Svg>
@@ -148,39 +135,41 @@ export default function CustomTabBar({
             tint={scheme === "dark" ? "dark" : "light"}
             style={StyleSheet.absoluteFill}
           />
+
+          {/* Masked bar border */}
+          <View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                borderWidth: 3,
+                borderColor: "rgba(242,184,75,0.28)",
+                borderRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 0,
+              },
+            ]}
+          />
         </MaskedView>
 
-        {/* Notch outline (so the cutout is visible) */}
+        {/* Curved notch border (no top line) */}
         <Animated.View
           style={[styles.notchBorder, notchBorderStyle]}
           pointerEvents="none"
         >
           <Svg width={notchW} height={NOTCH_DEPTH}>
             <Path
-              d={notchPath}
+              d={notchStrokePath}
               fill="transparent"
               stroke="rgba(242,184,75,0.55)"
               strokeWidth={1}
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
           </Svg>
         </Animated.View>
 
-        {/* Bar border */}
-        <View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFillObject,
-            {
-              borderWidth: 1,
-              borderColor: "rgba(242,184,75,0.28)",
-              borderRadius: BAR_RADIUS,
-              borderBottomLeftRadius: 0,
-              borderBottomRightRadius: 0,
-            },
-          ]}
-        />
-
-        {/* Tabs (icons can escape upward) */}
+        {/* Tabs */}
         <View style={styles.tabsLayer}>
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
@@ -192,6 +181,7 @@ export default function CustomTabBar({
                 target: route.key,
                 canPreventDefault: true,
               });
+
               if (!focused && !event.defaultPrevented) {
                 navigation.navigate(route.name);
               }
@@ -305,7 +295,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   badgeWrap: {
     width: 52,
     height: 52,
