@@ -1,29 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { Stack, router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet } from "react-native";
 
-import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text, View } from "@/components/Themed";
-
-import HeaderPillButton from "@/components/navigation/HeaderPillButton";
-import RecipeSearchBar, {
-  RecipeSearchScope,
-} from "@/components/recipes/RecipeSearchBar";
-
-import {
-  DayMealPlan,
-  MealType,
-  PlannedRecipeRef,
-  readTodayMealPlan,
-  writeTodayMealPlan,
-} from "@/utils/mealPlan/mealPlanStorage";
-
+import RecipeSearchBar from "@/components/recipes/RecipeSearchBar";
 import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
+
+import HeaderPillButton from "@/components/navigation/HeaderPillButton";
+import {
+    clearMealPlanDay,
+    DayMealPlan,
+    MealType,
+    PlannedRecipeRef,
+    readMealPlanDay,
+    writeMealPlanDay,
+} from "@/utils/mealPlan/mealPlanStorage";
 
 function slotLabel(t: (k: string) => string, type: MealType) {
   if (type === "breakfast") return t("meals.breakfast") || "Breakfast";
@@ -35,27 +30,29 @@ function plansEqual(a: DayMealPlan, b: DayMealPlan) {
   return JSON.stringify(a ?? {}) === JSON.stringify(b ?? {});
 }
 
-export default function MealPlanScreen() {
+type Props = {
+  dateKey: string; // YYYY-MM-DD
+  headerRightSlot?: (args: {
+    isDirty: boolean;
+    onSave: () => void;
+  }) => React.ReactNode;
+  showClearDay?: boolean;
+};
+
+export default function MealPlanEditor({
+  dateKey,
+  headerRightSlot,
+  showClearDay = true,
+}: Props) {
   const { t } = useTranslation();
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
-  // saved vs draft
   const [savedPlan, setSavedPlan] = useState<DayMealPlan>({});
   const [draftPlan, setDraftPlan] = useState<DayMealPlan>({});
 
   const [activeSlot, setActiveSlot] = useState<MealType | null>(null);
-
-  // search UI for picking recipes
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<RecipeSearchScope>({
-    text: true,
-    tags: true,
-    ingredients: true,
-  });
-
-  const allOff = !scope.text && !scope.tags && !scope.ingredients;
-  const hasQuery = query.trim().length > 0;
 
   const isDirty = useMemo(
     () => !plansEqual(savedPlan, draftPlan),
@@ -66,10 +63,10 @@ export default function MealPlanScreen() {
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     setRecipes(json ? (JSON.parse(json) as Recipe[]) : []);
 
-    const today = await readTodayMealPlan();
-    setSavedPlan(today);
-    setDraftPlan(today);
-  }, []);
+    const day = await readMealPlanDay(dateKey);
+    setSavedPlan(day);
+    setDraftPlan(day);
+  }, [dateKey]);
 
   useFocusEffect(
     useCallback(() => {
@@ -78,11 +75,10 @@ export default function MealPlanScreen() {
   );
 
   const filtered = useMemo(
-    () => filterRecipes(recipes, query, scope),
-    [recipes, query, scope],
+    () => filterRecipes(recipes, query),
+    [recipes, query],
   );
 
-  // draft updates only
   const onPickRecipe = useCallback(
     (recipe: Recipe) => {
       if (!activeSlot) return;
@@ -122,33 +118,25 @@ export default function MealPlanScreen() {
   }, [savedPlan]);
 
   const onSaveChanges = useCallback(async () => {
-    await writeTodayMealPlan(draftPlan);
+    await writeMealPlanDay(dateKey, draftPlan);
     setSavedPlan(draftPlan);
     setActiveSlot(null);
     setQuery("");
-    router.back(); // optional: go back after saving
-  }, [draftPlan]);
+  }, [dateKey, draftPlan]);
+
+  const onClearDay = useCallback(async () => {
+    await clearMealPlanDay(dateKey);
+    setSavedPlan({});
+    setDraftPlan({});
+    setActiveSlot(null);
+    setQuery("");
+  }, [dateKey]);
 
   return (
-    <ScrollViewContainer
-      keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="on-drag"
-    >
-      <Stack.Screen
-        options={{
-          title: t("meals.planTitle") || "Meal plan",
+    <View style={{ gap: 12 }}>
+      {/* optional header right injection (for Stack header in pages) */}
+      {headerRightSlot?.({ isDirty, onSave: onSaveChanges })}
 
-          headerRight: () =>
-            isDirty ? (
-              <HeaderPillButton
-                label={t("common.save") || "Save"}
-                onPress={onSaveChanges}
-              />
-            ) : null,
-        }}
-      />
-
-      {/* Today slots */}
       <View style={styles.card}>
         {(["breakfast", "lunch", "dinner"] as MealType[]).map((type) => {
           const slot = (draftPlan as any)[type] ?? null;
@@ -194,6 +182,25 @@ export default function MealPlanScreen() {
         })}
       </View>
 
+      {showClearDay && (
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <HeaderPillButton
+            label={t("common.cancel") || "Cancel"}
+            onPress={onCancelChanges}
+            disabled={!isDirty}
+          />
+          <HeaderPillButton
+            label={t("common.save") || "Save"}
+            onPress={onSaveChanges}
+            disabled={!isDirty}
+          />
+          <HeaderPillButton
+            label={t("common.clear") || "Clear day"}
+            onPress={onClearDay}
+          />
+        </View>
+      )}
+
       {/* Picker */}
       {activeSlot && (
         <View style={styles.pickerCard}>
@@ -204,17 +211,10 @@ export default function MealPlanScreen() {
           <RecipeSearchBar
             query={query}
             onChangeQuery={setQuery}
-            scope={scope}
-            onChangeScope={setScope}
             resultCount={filtered.length}
           />
 
-          {allOff && hasQuery ? (
-            <Text style={styles.helperText}>
-              {t("recipes.turnOnFilter") ||
-                "Choose at least one filter (Text / Tags / Ingredients)."}
-            </Text>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 ? (
             <Text style={styles.helperText}>
               {t("recipes.emptySearch") || "No recipes found for your search."}
             </Text>
@@ -245,34 +245,11 @@ export default function MealPlanScreen() {
           </Pressable>
         </View>
       )}
-
-      {/* Bottom buttons (optional if you prefer header buttons only) */}
-      {isDirty && (
-        <View style={styles.bottomActions}>
-          <Pressable onPress={onCancelChanges} style={styles.bottomBtn}>
-            <Text style={styles.bottomBtnText}>
-              {t("common.cancel") || "Cancel"}
-            </Text>
-          </Pressable>
-
-          <Pressable onPress={onSaveChanges} style={styles.bottomBtn}>
-            <Text style={styles.bottomBtnText}>
-              {t("common.save") || "Save"}
-            </Text>
-          </Pressable>
-        </View>
-      )}
-    </ScrollViewContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerBtn: {
-    fontSize: 15,
-    fontWeight: "700",
-    opacity: 0.8,
-  },
-
   card: {
     borderRadius: 16,
     padding: 16,
@@ -290,7 +267,7 @@ const styles = StyleSheet.create({
   pickingHint: { fontSize: 12, opacity: 0.6, marginTop: 2 },
 
   pickerCard: {
-    marginTop: 16,
+    marginTop: 4,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
@@ -308,22 +285,4 @@ const styles = StyleSheet.create({
   pickSubtitle: { fontSize: 12, opacity: 0.7, marginTop: 2 },
   closePickerBtn: { paddingVertical: 10, alignSelf: "flex-start" },
   closePickerText: { fontSize: 13, fontWeight: "700", opacity: 0.7 },
-
-  bottomActions: {
-    marginTop: 16,
-    flexDirection: "row",
-    gap: 12,
-  },
-  bottomBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  bottomBtnText: {
-    fontSize: 14,
-    fontWeight: "700",
-    opacity: 0.8,
-  },
 });
