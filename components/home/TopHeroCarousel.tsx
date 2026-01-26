@@ -6,14 +6,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import {
-    Dimensions,
-    ImageBackground,
-    NativeScrollEvent,
-    NativeSyntheticEvent,
-    Pressable,
-    View as RNView,
-    ScrollView,
-    StyleSheet,
+  Dimensions,
+  ImageBackground,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Pressable,
+  View as RNView,
+  ScrollView,
+  StyleSheet,
 } from "react-native";
 
 export type MealType = "breakfast" | "lunch" | "dinner";
@@ -118,7 +118,7 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
               >
                 {empty && (
                   <RNView style={styles.emptyOverlay}>
-                    <Ionicons name="add" size={44} color="#fff" />
+                    <Ionicons name="add" size={54} color="#fff" />
                   </RNView>
                 )}
               </ImageBackground>
@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 999,
+    marginTop: 14,
   },
 
   dotActive: { backgroundColor: "#fff" },
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
 
   bottomDivider: {
     height: StyleSheet.hairlineWidth,
-    marginTop: 22,
+    marginTop: 26,
     opacity: 0.9,
   },
 });
