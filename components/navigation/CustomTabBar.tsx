@@ -1,26 +1,42 @@
+import MaskedView from "@react-native-masked-view/masked-view";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import React, { useEffect, useMemo } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
-import Svg, { Path } from "react-native-svg";
+import Svg, { Defs, G, Mask, Path, Rect } from "react-native-svg";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 
-/* ───────────────────────── constants (NO hooks here) ───────────────────────── */
+/* ───────────────────────── constants ───────────────────────── */
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const BAR_MARGIN_H = 18;
 const BAR_HEIGHT = 64;
 const BAR_RADIUS = 28;
 
-const AnimatedSvg = Animated.createAnimatedComponent(Svg);
+const NOTCH_DEPTH = 50;
+const LIFT_Y = 18;
+
+const AnimatedG = Animated.createAnimatedComponent(G);
+
+/* ───────────────────────── notch path (local coords) ───────────────────────── */
+// This is the “bite” shape drawn in its own little box [0..w, 0..h]
+function buildNotchPath(w: number, h: number) {
+  return `
+    M 0 0
+    C ${w * 0.18} 0, ${w * 0.22} ${h}, ${w * 0.5} ${h}
+    C ${w * 0.78} ${h}, ${w * 0.82} 0, ${w} 0
+    L 0 0
+    Z
+  `;
+}
 
 /* ───────────────────────── types ───────────────────────── */
 
@@ -39,96 +55,154 @@ export default function CustomTabBar({
   activeColor,
   inactiveColor,
 }: CustomTabBarProps) {
-  const scheme = useColorScheme();
-  const theme = Colors[scheme ?? "light"];
+  const scheme = useColorScheme() ?? "light";
+  const theme = Colors[scheme];
 
-  // ✅ MUCH darker active icon
   const finalActiveColor = activeColor ?? theme.tabIconActive;
-
   const finalInactiveColor = inactiveColor ?? theme.tabIconDefault;
 
   const tabCount = state.routes.length;
   const barWidth = SCREEN_WIDTH;
   const slotWidth = barWidth / tabCount;
 
+  const notchW = Math.min(120, slotWidth * 1.15);
+  const notchPath = useMemo(
+    () => buildNotchPath(notchW, NOTCH_DEPTH),
+    [notchW],
+  );
+
+  // Active center X (within barWidth coordinates)
   const x = useSharedValue(slotWidth * state.index + slotWidth / 2);
 
   useEffect(() => {
     x.value = withSpring(slotWidth * state.index + slotWidth / 2, {
       damping: 16,
-      stiffness: 160,
+      stiffness: 180,
       mass: 0.6,
     });
   }, [state.index, slotWidth]);
 
-  const blobW = Math.min(64, slotWidth * 0.75);
-  const blobH = 42;
+  // notch left position
+  const notchLeft = useSharedValue(x.value - notchW / 2);
 
-  const blobPath = useMemo(() => {
-    const w = blobW;
-    const h = blobH;
-    return `
-      M ${w * 0.15} ${h * 0.55}
-      C ${w * 0.15} ${h * 0.15}, ${w * 0.35} ${h * 0.05}, ${w * 0.5} ${h * 0.05}
-      C ${w * 0.65} ${h * 0.05}, ${w * 0.85} ${h * 0.15}, ${w * 0.85} ${h * 0.55}
-      C ${w * 0.85} ${h * 0.9}, ${w * 0.65} ${h * 0.98}, ${w * 0.5} ${h * 0.98}
-      C ${w * 0.35} ${h * 0.98}, ${w * 0.15} ${h * 0.9}, ${w * 0.15} ${h * 0.55}
-      Z
-    `;
-  }, [blobW, blobH]);
+  useEffect(() => {
+    notchLeft.value = withSpring(x.value - notchW / 2, {
+      damping: 16,
+      stiffness: 180,
+      mass: 0.6,
+    });
+  }, [x.value]); // (reanimated value, ok)
 
-  const blobStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: x.value - blobW / 2 }, { translateY: 10 }],
-    };
-  });
+  // For SVG we’ll drive translateX via animatedProps (reliable for masks)
+  const notchGProps = useAnimatedProps(() => ({
+    transform: [{ translateX: x.value - notchW / 2 }],
+  }));
+
+  // Border outline can use regular animated style wrapper
+  const notchBorderStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: x.value - notchW / 2 }],
+  }));
 
   return (
     <View
-      style={[styles.wrap, { bottom: insets.bottom }]} // ✅ flush to bottom (safe-area aware)
+      style={[styles.wrap, { paddingBottom: insets.bottom }]}
       pointerEvents="box-none"
     >
-      <View style={[styles.barOuter, { width: barWidth, height: BAR_HEIGHT }]}>
-        <BlurView
-          intensity={scheme === "dark" ? 45 : 55}
-          tint={scheme === "dark" ? "dark" : "light"}
-          style={StyleSheet.absoluteFill}
-        >
-          <View
-            style={{
-              ...StyleSheet.absoluteFillObject,
-              backgroundColor:
-                scheme === "dark"
-                  ? "rgba(246,196,83,0.08)"
-                  : "rgba(244,169,56,0.10)",
-            }}
-          />
-        </BlurView>
+      <View style={[styles.container, { width: barWidth, height: BAR_HEIGHT }]}>
+        {/* ✅ TRUE hole: MaskedView uses alpha; this SVG mask produces transparent notch pixels */}
+        <MaskedView
+          style={[styles.barShell, { borderRadius: BAR_RADIUS }]}
+          maskElement={
+            <Svg width={barWidth} height={BAR_HEIGHT}>
+              <Defs>
+                <Mask id="cut">
+                  {/* visible area = opaque */}
+                  <Rect
+                    x="0"
+                    y="0"
+                    width={barWidth}
+                    height={BAR_HEIGHT}
+                    fill="white"
+                  />
+                  {/* notch area = transparent (black in SVG mask) */}
+                  <AnimatedG animatedProps={notchGProps}>
+                    <Path d={notchPath} fill="black" />
+                  </AnimatedG>
+                </Mask>
+              </Defs>
 
-        <Animated.View style={[styles.blob, blobStyle]} pointerEvents="none">
-          <AnimatedSvg width={blobW} height={blobH}>
+              {/* Output alpha for MaskedView: a solid rect with the mask applied */}
+              <Rect
+                x="0"
+                y="0"
+                width={barWidth}
+                height={BAR_HEIGHT}
+                fill="black" // color irrelevant; alpha comes from mask
+                mask="url(#cut)"
+              />
+            </Svg>
+          }
+        >
+          <BlurView
+            intensity={scheme === "dark" ? 45 : 55}
+            tint={scheme === "dark" ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+        </MaskedView>
+
+        {/* Notch outline (so the cutout is visible) */}
+        <Animated.View
+          style={[styles.notchBorder, notchBorderStyle]}
+          pointerEvents="none"
+        >
+          <Svg width={notchW} height={NOTCH_DEPTH}>
             <Path
-              d={blobPath}
-              fill={
-                scheme === "dark"
-                  ? "rgba(246,196,83,0.28)"
-                  : "rgba(244,169,56,0.28)"
-              }
+              d={notchPath}
+              fill="transparent"
+              stroke="rgba(242,184,75,0.55)"
+              strokeWidth={1}
             />
-          </AnimatedSvg>
+          </Svg>
         </Animated.View>
 
-        <View style={styles.row}>
+        {/* Bar border */}
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              borderWidth: 1,
+              borderColor: "rgba(242,184,75,0.28)",
+              borderRadius: BAR_RADIUS,
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+            },
+          ]}
+        />
+
+        {/* Tabs (icons can escape upward) */}
+        <View style={styles.tabsLayer}>
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
             const focused = state.index === index;
+
+            const onPress = () => {
+              const event = navigation.emit({
+                type: "tabPress",
+                target: route.key,
+                canPreventDefault: true,
+              });
+              if (!focused && !event.defaultPrevented) {
+                navigation.navigate(route.name);
+              }
+            };
 
             return (
               <TabButton
                 key={route.key}
                 width={slotWidth}
                 focused={focused}
-                onPress={() => navigation.navigate(route.name)}
+                onPress={onPress}
                 renderIcon={options.tabBarIcon}
                 activeColor={finalActiveColor}
                 inactiveColor={finalInactiveColor}
@@ -158,13 +232,42 @@ function TabButton({
   activeColor: string;
   inactiveColor: string;
 }) {
+  const lift = useSharedValue(0);
+
+  useEffect(() => {
+    lift.value = withSpring(focused ? 1 : 0, {
+      damping: 14,
+      stiffness: 220,
+      mass: 0.55,
+    });
+  }, [focused]);
+
+  const liftStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: -LIFT_Y * lift.value },
+      { scale: 1 + 0.08 * lift.value },
+    ],
+  }));
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    opacity: 0.2 + 0.8 * lift.value,
+    transform: [{ scale: 0.9 + 0.18 * lift.value }],
+  }));
+
   return (
-    <Pressable onPress={onPress} style={[styles.item, { width }]}>
-      {renderIcon?.({
-        focused,
-        color: focused ? activeColor : inactiveColor,
-        size: 24,
-      })}
+    <Pressable onPress={onPress} style={[styles.item, { width }]} hitSlop={10}>
+      <Animated.View style={liftStyle}>
+        <View style={styles.badgeWrap} pointerEvents="none">
+          <Animated.View style={[styles.badge, badgeStyle]} />
+          <View style={styles.iconCenter}>
+            {renderIcon?.({
+              focused,
+              color: focused ? activeColor : inactiveColor,
+              size: 24,
+            })}
+          </View>
+        </View>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -176,29 +279,56 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
+    bottom: 0,
     alignItems: "center",
   },
-  barOuter: {
-    borderRadius: BAR_RADIUS,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(244,169,56,0.3)",
+  container: {
+    position: "relative",
+    overflow: "visible",
   },
-  row: {
+  barShell: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+  },
+  notchBorder: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
+  tabsLayer: {
     flex: 1,
     flexDirection: "row",
+    overflow: "visible",
   },
   item: {
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
   },
-  blob: {
+
+  badgeWrap: {
+    width: 52,
+    height: 52,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCenter: {
     position: "absolute",
-    top: 0,
-    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    position: "absolute",
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(255,255,255,0.99)",
+    borderWidth: 1,
+    borderColor: "rgba(242,184,75,0.55)",
+    shadowColor: "#000",
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
 });
