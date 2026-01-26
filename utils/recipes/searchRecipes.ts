@@ -33,21 +33,19 @@ export function filterRecipes<T extends RecipeLike>(
   const tokens = tokenize(query);
   if (tokens.length === 0) return recipes;
 
-  // safety: if everything off, behave like text search
-  const useText =
-    scope.text || (!scope.text && !scope.tags && !scope.ingredients);
-  const useTags = scope.tags;
-  const useIng = scope.ingredients;
+  // ✅ if everything is off, match nothing
+  if (!scope.text && !scope.tags && !scope.ingredients) return [];
 
   return recipes.filter((r) => {
     const matchesText =
-      useText && includesAllTokens(`${r.title} ${r.description}`, tokens);
+      scope.text && includesAllTokens(`${r.title} ${r.description}`, tokens);
 
     const matchesTags =
-      useTags && includesAllTokens((r.tags ?? []).join(" "), tokens);
+      scope.tags && includesAllTokens((r.tags ?? []).join(" "), tokens);
 
     const matchesIngredients =
-      useIng && includesAllTokens((r.ingredients ?? []).join(" "), tokens);
+      scope.ingredients &&
+      includesAllTokens((r.ingredients ?? []).join(" "), tokens);
 
     return matchesText || matchesTags || matchesIngredients;
   });

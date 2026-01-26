@@ -1,4 +1,3 @@
-// TabTwoScreen.tsx (updated)
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -38,6 +37,10 @@ export default function TabTwoScreen() {
     ingredients: true,
   });
 
+  // derived UI state
+  const allOff = !scope.text && !scope.tags && !scope.ingredients;
+  const hasQuery = query.trim().length > 0;
+
   const loadRecipes = useCallback(async () => {
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
@@ -45,13 +48,14 @@ export default function TabTwoScreen() {
   }, []);
 
   const toggleFavorite = useCallback(async (id: string) => {
+    // optimistic UI
     setRecipes((prev) =>
       prev.map((r) => (r.id === id ? { ...r, isFavorite: !r.isFavorite } : r)),
     );
 
+    // persist
     const json = await AsyncStorage.getItem(RECIPES_KEY);
     const data: Recipe[] = json ? JSON.parse(json) : [];
-
     const next = data.map((r) =>
       r.id === id ? { ...r, isFavorite: !r.isFavorite } : r,
     );
@@ -74,6 +78,7 @@ export default function TabTwoScreen() {
     <ScrollViewContainer contentContainerStyle={styles.container}>
       <Stack.Screen />
 
+      {/* Search + filters */}
       <RecipeSearchBar
         query={query}
         onChangeQuery={setQuery}
@@ -82,9 +87,15 @@ export default function TabTwoScreen() {
         resultCount={filtered.length}
       />
 
-      {filtered.length === 0 ? (
+      {/* Results / empty states */}
+      {allOff && hasQuery ? (
+        <Text style={styles.helperText}>
+          {t("recipes.turnOnFilter") ||
+            "Choose at least one filter (Text / Tags / Ingredients)."}
+        </Text>
+      ) : filtered.length === 0 ? (
         <Text>
-          {t("recipes.emptySearch") || "No recipes match your search."}
+          {t("recipes.emptySearch") || "No recipes found for your search."}
         </Text>
       ) : (
         filtered.map((r) => (
@@ -110,5 +121,9 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 12,
     paddingBottom: 24,
+  },
+  helperText: {
+    opacity: 0.7,
+    paddingVertical: 12,
   },
 });

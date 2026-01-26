@@ -35,14 +35,7 @@ export default function RecipeSearchBar({
   const c = Colors[scheme];
 
   const toggle = (key: keyof RecipeSearchScope) => {
-    const next = { ...scope, [key]: !scope[key] };
-
-    // if user turns everything off, keep UX sane: fall back to enabling text
-    if (!next.text && !next.tags && !next.ingredients) {
-      next.text = true;
-    }
-
-    onChangeScope(next);
+    onChangeScope({ ...scope, [key]: !scope[key] });
   };
 
   return (

@@ -57,6 +57,7 @@ const resources = {
         emptySearch: "No recipes found for your search.",
         oneResult: "result",
         manyResults: "results",
+        turnOnFilter: "Turn on at least one filter to search.",
       },
       common: {
         showMore: "Show more",
@@ -122,6 +123,7 @@ const resources = {
         emptySearch: "Ingen opskrifter fundet for din søgning.",
         oneResult: "resultat",
         manyResults: "resultater",
+        turnOnFilter: "Tænd for mindst ét filter for at søge.",
       },
       common: {
         showMore: "Vis mere",
