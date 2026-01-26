@@ -42,10 +42,10 @@ export default function TabOneScreen() {
     <ScrollViewContainer>
       <Stack.Screen options={{ title: t("tabs.home") }} />
 
-      <Text style={styles.title}>{t("home.today") || "Today"}</Text>
-
-      <TodaysMealPlan meals={meals} />
-
+      <Text style={styles.title}>{t("home.todaysMealPlan") || "Today"}</Text>
+      <View style={{ flex: 1, marginHorizontal: -16 }}>
+        <TodaysMealPlan meals={meals} />
+      </View>
       <View style={styles.actionsBlock}>
         <StyledButton
           title={t("createRecipe.screenTitle")}
@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "800",
-    marginBottom: 12,
   },
   actionsBlock: {
     marginTop: 24,

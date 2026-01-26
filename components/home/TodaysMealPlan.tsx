@@ -64,9 +64,7 @@ export default function TodaysMealPlan({ meals }: Props) {
   };
 
   return (
-    <View
-      style={[styles.card, { backgroundColor: c.card, borderColor: c.border }]}
-    >
+    <View style={[styles.card]}>
       {/* Horizontal cards */}
       <ScrollView
         horizontal
@@ -103,10 +101,9 @@ export default function TodaysMealPlan({ meals }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
-    gap: 14,
+    paddingTop: 0,
+    borderColor: "transparent",
   },
 
   scrollContent: {
@@ -127,7 +124,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  footer: {
-    marginTop: 8,
-  },
+  footer: {},
 });

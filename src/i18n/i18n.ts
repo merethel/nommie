@@ -71,7 +71,7 @@ const resources = {
         clear: "Clear",
       },
       home: {
-        today: "Today",
+        todaysMealPlan: "Today's meal plan",
       },
       meals: {
         breakfast: "Breakfast",
@@ -154,7 +154,7 @@ const resources = {
         clear: "Ryd",
       },
       home: {
-        today: "I dag",
+        todaysMealPlan: "Dagens måltidsplan",
       },
       meals: {
         planMeal: "Planlæg måltid",
