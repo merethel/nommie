@@ -1,3 +1,4 @@
+import { DEFAULT_RECIPE_IMAGE } from "@/constants/images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { Stack, useRouter } from "expo-router";
@@ -71,15 +72,11 @@ export default function CreateRecipeScreen() {
       ingredients: parseToList(ingredients),
       instructions: parseToList(instructions),
       createdAt: Date.now(),
-      photoUri:
-        photoUri ??
-        "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
+      photoUri: photoUri ?? undefined,
     };
 
     const existing = await AsyncStorage.getItem(RECIPES_KEY);
     const recipes: Recipe[] = existing ? JSON.parse(existing) : [];
-
-    // add newest first
     const updated = [newRecipe, ...recipes];
     await AsyncStorage.setItem(RECIPES_KEY, JSON.stringify(updated));
 
@@ -94,12 +91,18 @@ export default function CreateRecipeScreen() {
         <Text style={styles.label}>{t("createRecipe.photoLabel")}</Text>
 
         <Pressable style={styles.imagePicker} onPress={pickImage}>
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.image} />
-          ) : (
-            <Text style={styles.imagePlaceholder}>
-              {t("createRecipe.addPhoto")}
-            </Text>
+          <Image
+            source={photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE}
+            style={styles.image}
+            resizeMode="cover"
+          />
+
+          {!photoUri && (
+            <View style={styles.overlay}>
+              <Text style={styles.imagePlaceholder}>
+                {t("createRecipe.addPhoto")}
+              </Text>
+            </View>
           )}
         </Pressable>
 
@@ -202,6 +205,14 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   imagePlaceholder: {
-    opacity: 0.6,
+    color: "#fff",
+    fontWeight: "700",
+    opacity: 0.9,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.15)",
   },
 });

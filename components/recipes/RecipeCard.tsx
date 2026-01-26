@@ -1,6 +1,7 @@
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { DEFAULT_RECIPE_IMAGE } from "@/constants/images";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
@@ -51,22 +52,18 @@ export function RecipeCard({
             tags: JSON.stringify(tags),
             ingredients: JSON.stringify(ingredients),
             instructions,
-            photoUri:
-              photoUri ??
-              "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg",
+            photoUri: photoUri ?? "", // ✅ no hardcoded path
           },
         })
       }
     >
       <View style={styles.header}>
-        {/*image*/}
-        {photoUri && (
-          <Image
-            source={{ uri: photoUri }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        )}
+        {/* ✅ ALWAYS render image */}
+        <Image
+          source={photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE}
+          style={styles.image}
+          resizeMode="cover"
+        />
 
         <View style={styles.titleRow}>
           <Text style={styles.title} numberOfLines={4} ellipsizeMode="tail">
@@ -75,7 +72,7 @@ export function RecipeCard({
 
           <TouchableOpacity
             onPress={(e) => {
-              e.stopPropagation(); // don't navigate
+              e.stopPropagation();
               onToggleFavorite(id);
             }}
             hitSlop={10}
@@ -124,12 +121,6 @@ const styles = StyleSheet.create({
   header: { marginBottom: 10, backgroundColor: "transparent" },
   description: { marginTop: 4, opacity: 0.75 },
   section: { backgroundColor: "transparent" },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
-    marginBottom: 8,
-    opacity: 0.9,
-  },
   chipsWrap: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -158,14 +149,12 @@ const styles = StyleSheet.create({
     gap: 10,
     backgroundColor: "transparent",
   },
-
   title: {
     fontSize: 16,
     fontWeight: "700",
     flex: 1,
     minWidth: 0,
   },
-
   heartBtn: {
     padding: 6,
     flexShrink: 0,

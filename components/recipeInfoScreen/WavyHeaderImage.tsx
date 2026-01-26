@@ -1,6 +1,7 @@
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { DEFAULT_RECIPE_IMAGE } from "@/constants/images";
 import * as ImagePicker from "expo-image-picker";
 import { t } from "i18next";
 import React, { useMemo } from "react";
@@ -72,19 +73,11 @@ export default function WavyHeaderImage({
     return (
       <RNView style={{ marginTop: 40 }}>
         <Pressable onPress={pickImage} style={styles.editImageWrap}>
-          {photoUri ? (
-            <Image
-              source={{ uri: photoUri }}
-              style={styles.editImage}
-              resizeMode="cover"
-            />
-          ) : (
-            <View style={styles.placeholderInner}>
-              <Text style={[styles.placeholderText, { color: c.muted }]}>
-                {t("createRecipe.addPhoto")}
-              </Text>
-            </View>
-          )}
+          <Image
+            source={photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE}
+            style={styles.editImage}
+            resizeMode="cover"
+          />
 
           {/* ✅ centered overlay text */}
           <RNView style={styles.overlayCenter} pointerEvents="none">
@@ -115,7 +108,7 @@ export default function WavyHeaderImage({
   /* ------------------------------------------------------------------ */
   /* VIEW MODE — wavy image header in the background                     */
   /* ------------------------------------------------------------------ */
-  if (!photoUri) return null;
+  const headerSource = photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE;
 
   return (
     <View style={[styles.wavyHeaderWrap, { backgroundColor: "transparent" }]}>
@@ -127,7 +120,7 @@ export default function WavyHeaderImage({
         </Defs>
 
         <SvgImage
-          href={{ uri: photoUri }}
+          href={headerSource as any}
           width="100%"
           height="100%"
           preserveAspectRatio="xMidYMid slice"

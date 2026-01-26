@@ -1,6 +1,7 @@
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { DEFAULT_RECIPE_IMAGE, PLAN_MEAL_IMAGE } from "@/constants/images";
 import { getRecipeById } from "@/utils/recipes/recipeStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -31,9 +32,6 @@ type Props = {
   meals: MealSlot[];
   height?: number;
 };
-
-const FALLBACK_PHOTO =
-  "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg";
 
 function mealLabel(type: MealType) {
   if (type === "breakfast") return "Breakfast";
@@ -66,7 +64,7 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
         tags: JSON.stringify(recipe.tags ?? []),
         ingredients: JSON.stringify(recipe.ingredients ?? []),
         instructions: JSON.stringify(recipe.instructions ?? []),
-        photoUri: recipe.photoUri ?? FALLBACK_PHOTO,
+        photoUri: recipe.photoUri ?? "",
       },
     });
   };
@@ -101,8 +99,12 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
         onMomentumScrollEnd={onMomentumEnd}
       >
         {items.map((meal) => {
-          const img = meal.recipe?.photoUri ?? FALLBACK_PHOTO;
-          const empty = !meal.recipe;
+          const hasRecipe = !!meal.recipe;
+          const imgSource = hasRecipe
+            ? meal.recipe?.photoUri
+              ? { uri: meal.recipe.photoUri }
+              : DEFAULT_RECIPE_IMAGE
+            : PLAN_MEAL_IMAGE;
 
           return (
             <Pressable
@@ -111,12 +113,12 @@ export default function TopHeroCarousel({ meals, height = 220 }: Props) {
               style={{ width: pageWidth }}
             >
               <ImageBackground
-                source={{ uri: img }}
+                source={imgSource}
                 style={[styles.hero, { height }]}
                 imageStyle={styles.heroImage}
                 resizeMode="cover"
               >
-                {empty && (
+                {!hasRecipe && (
                   <RNView style={styles.emptyOverlay}>
                     <Ionicons name="add" size={54} color="#fff" />
                   </RNView>

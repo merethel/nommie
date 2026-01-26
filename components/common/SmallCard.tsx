@@ -1,6 +1,7 @@
 import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
+import { DEFAULT_RECIPE_IMAGE } from "@/constants/images";
 import React from "react";
 import { Image, Pressable, StyleSheet } from "react-native";
 
@@ -9,9 +10,6 @@ type Props = {
   photoUri?: string;
   onPress?: () => void;
 };
-
-const FALLBACK_PHOTO =
-  "/Users/merethe/Desktop/Apps/nommie/assets/images/default_images/default1.jpg";
 
 export default function SmallCard({ title, photoUri, onPress }: Props) {
   const scheme = useColorScheme() ?? "light";
@@ -32,7 +30,7 @@ export default function SmallCard({ title, photoUri, onPress }: Props) {
     >
       <View style={styles.imageWrap}>
         <Image
-          source={{ uri: photoUri || FALLBACK_PHOTO }}
+          source={photoUri ? { uri: photoUri } : DEFAULT_RECIPE_IMAGE}
           style={styles.image}
           resizeMode="cover"
         />
