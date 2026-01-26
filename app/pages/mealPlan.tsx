@@ -21,10 +21,9 @@ import {
   writeTodayMealPlan,
 } from "@/utils/mealPlan/mealPlanStorage";
 
+import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
-
-const RECIPES_KEY = "nommie_recipes";
 
 function slotLabel(t: (k: string) => string, type: MealType) {
   if (type === "breakfast") return t("meals.breakfast") || "Breakfast";

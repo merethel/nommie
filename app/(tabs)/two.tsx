@@ -11,10 +11,9 @@ import { RecipeCard } from "../../components/recipes/RecipeCard";
 import RecipeSearchBar, {
   RecipeSearchScope,
 } from "@/components/recipes/RecipeSearchBar";
+import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
-
-const RECIPES_KEY = "nommie_recipes";
 
 export default function TabTwoScreen() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);

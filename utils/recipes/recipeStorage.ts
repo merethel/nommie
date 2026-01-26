@@ -1,7 +1,6 @@
+import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const RECIPES_KEY = "nommie_recipes";
 
 export async function readRecipes(): Promise<Recipe[]> {
   const raw = await AsyncStorage.getItem(RECIPES_KEY);
