@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
-import TodaysMealPlan from "@/components/home/TodaysMealPlan";
+import TopHeroCarousel from "@/components/home/TopHeroCarousel";
 import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
 
 type MealSlot = {
@@ -44,7 +44,7 @@ export default function TabOneScreen() {
 
       <Text style={styles.title}>{t("home.todaysMealPlan") || "Today"}</Text>
       <View style={{ flex: 1, marginHorizontal: -16 }}>
-        <TodaysMealPlan meals={meals} />
+        <TopHeroCarousel meals={meals} height={240} />
       </View>
       <View style={styles.actionsBlock}>
         <StyledButton
