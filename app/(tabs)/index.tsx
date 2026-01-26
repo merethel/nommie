@@ -1,5 +1,5 @@
 import StyledButton from "@/components/common/StyledButton";
-import { Text, View } from "@/components/Themed";
+import { View } from "@/components/Themed";
 import { useFocusEffect } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
 import { useCallback, useState } from "react";
@@ -39,10 +39,11 @@ export default function TabOneScreen() {
   );
 
   return (
-    <ScrollViewContainer>
-      <Stack.Screen options={{ title: t("tabs.home") }} />
-
-      <Text style={styles.title}>{t("home.todaysMealPlan") || "Today"}</Text>
+    <ScrollViewContainer
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingTop: 0, marginTop: 0 }}
+    >
+      <Stack.Screen />
       <View style={{ flex: 1, marginHorizontal: -16 }}>
         <TopHeroCarousel meals={meals} height={240} />
       </View>

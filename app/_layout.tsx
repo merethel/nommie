@@ -92,9 +92,6 @@ function RootLayoutNav() {
           {/* Tabs manage their own headers */}
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-          {/* Modal example */}
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-
           {/* Other screens automatically inherit header styles */}
         </Stack>
       </ThemeProvider>
