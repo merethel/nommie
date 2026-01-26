@@ -109,7 +109,10 @@ export default function RecipeSearchBar({
         query.trim().length > 0 &&
         typeof resultCount === "number" && (
           <Text style={[styles.resultCount, { color: c.muted }]}>
-            {resultCount} {resultCount === 1 ? "result" : "results"}
+            {resultCount}{" "}
+            {resultCount === 1
+              ? t("recipes.oneResult")
+              : t("recipes.manyResults")}
           </Text>
         )}
     </View>

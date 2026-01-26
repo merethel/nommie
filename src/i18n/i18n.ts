@@ -54,6 +54,9 @@ const resources = {
         searchText: "Text",
         searchTags: "Tags",
         searchIngredients: "Ingredients",
+        emptySearch: "No recipes found for your search.",
+        oneResult: "result",
+        manyResults: "results",
       },
       common: {
         showMore: "Show more",
@@ -116,6 +119,9 @@ const resources = {
         searchText: "Tekst",
         searchTags: "Tags",
         searchIngredients: "Ingredienser",
+        emptySearch: "Ingen opskrifter fundet for din søgning.",
+        oneResult: "resultat",
+        manyResults: "resultater",
       },
       common: {
         showMore: "Vis mere",
