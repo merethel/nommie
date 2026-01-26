@@ -1,4 +1,5 @@
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
+import HeaderBackPill from "@/components/navigation/HeaderBackPill";
 import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
@@ -215,10 +216,7 @@ export default function RecipeInfo() {
                 onPress={onCancelEdit}
               />
             ) : (
-              <HeaderPillButton
-                label={t("common.back") || "Back"}
-                onPress={() => router.back()}
-              />
+              <HeaderBackPill />
             ),
 
           headerRight: () =>

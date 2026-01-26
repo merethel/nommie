@@ -11,6 +11,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Pressable, StyleSheet } from "react-native";
 
+import HeaderBackPill from "@/components/navigation/HeaderBackPill";
 import { useColorScheme } from "@/components/useColorScheme";
 import { LanguageProvider } from "@/src/i18n/LanguageProvider";
 
@@ -74,19 +75,13 @@ function RootLayoutNav() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack
           screenOptions={{
-            // header basics
             headerShown: true,
             headerTransparent: true,
             title: "",
+            headerShadowVisible: false,
+            headerStyle: { shadowColor: "transparent" } as any,
 
-            // remove bottom border / shadow
-            headerShadowVisible: false, // iOS
-            headerStyle: {
-              shadowColor: "transparent",
-            } as any, // Android (TS-safe)
-
-            // global back button
-            headerLeft: () => <HeaderBackButton />,
+            headerLeft: () => <HeaderBackPill />,
           }}
         >
           {/* Tabs manage their own headers */}

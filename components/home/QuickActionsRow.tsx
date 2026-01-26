@@ -57,7 +57,7 @@ export default function QuickActionsRow() {
 
 const styles = StyleSheet.create({
   row: {
-    marginTop: 28,
+    marginTop: 22,
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",

@@ -150,19 +150,6 @@ export default function MealPlanScreen() {
         options={{
           title: t("meals.planTitle") || "Meal plan",
 
-          headerLeft: () =>
-            isDirty ? (
-              <HeaderPillButton
-                label={t("common.cancel") || "Cancel"}
-                onPress={onCancelChanges}
-              />
-            ) : (
-              <HeaderPillButton
-                label={t("common.back") || "Back"}
-                onPress={() => router.back()}
-              />
-            ),
-
           headerRight: () =>
             isDirty ? (
               <HeaderPillButton
