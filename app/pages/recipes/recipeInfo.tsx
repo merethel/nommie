@@ -1,12 +1,12 @@
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
-import HeaderTextButton from "@/components/navigation/HeaderTextButton";
+import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeForm from "@/components/recipeInfoScreen/RecipeForm";
 import WavyHeaderImage from "@/components/recipeInfoScreen/WavyHeaderImage";
 import { useRecipeEditor } from "@/utils/hooks/useRecipeEditor";
 import { parseStringListParam } from "@/utils/parseStringListParam";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { t } from "i18next";
 import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -39,6 +39,21 @@ async function writeRecipes(recipes: Recipe[]) {
   await AsyncStorage.setItem(RECIPES_KEY, JSON.stringify(recipes));
 }
 
+function snapshotFromEditor(e: any) {
+  return {
+    title: e.title ?? "",
+    description: e.description ?? "",
+    tagsText: e.tagsText ?? "",
+    ingredientsText: e.ingredientsText ?? "",
+    instructionsText: e.instructionsText ?? "",
+    photoUri: e.photoUri ?? "",
+  };
+}
+
+function snapshotsEqual(a: any, b: any) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export default function RecipeInfo() {
   const params = useLocalSearchParams<{
     id?: string;
@@ -48,19 +63,20 @@ export default function RecipeInfo() {
     ingredients?: string;
     instructions?: string;
     photoUri?: string;
-    isFavorite?: string; // optional legacy
+    isFavorite?: string;
   }>();
+
   const recipeId = params.id ?? "";
+  const router = useRouter();
+
   const initialIngredients = useMemo(
     () => parseStringListParam(params.ingredients),
     [params.ingredients],
   );
-
   const initialTags = useMemo(
     () => parseStringListParam(params.tags),
     [params.tags],
   );
-
   const initialInstructions = useMemo(
     () => parseStringListParam(params.instructions),
     [params.instructions],
@@ -91,7 +107,15 @@ export default function RecipeInfo() {
 
   const [isFavorite, setIsFavorite] = useState(params.isFavorite === "true");
 
-  // IMPORTANT: when coming back / reopening, always refresh favorite from AsyncStorage
+  // snapshot when you START editing (used for Cancel + dirty check)
+  const [editSnapshot, setEditSnapshot] = useState(() =>
+    snapshotFromEditor(editor),
+  );
+
+  const isDirty = editor.isEditing
+    ? !snapshotsEqual(editSnapshot, snapshotFromEditor(editor))
+    : false;
+
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
@@ -103,7 +127,6 @@ export default function RecipeInfo() {
         const stored = recipes.find((r) => r.id === recipeId);
 
         if (!cancelled) {
-          // Prefer storage value if present
           setIsFavorite(
             stored ? !!stored.isFavorite : params.isFavorite === "true",
           );
@@ -128,7 +151,6 @@ export default function RecipeInfo() {
     if (idx >= 0) {
       recipes[idx] = { ...recipes[idx], isFavorite: next };
     } else {
-      // If it doesn't exist yet, create it (or you can choose to do nothing)
       recipes.push({
         id: recipeId,
         title: editor.title,
@@ -152,29 +174,58 @@ export default function RecipeInfo() {
     }
 
     await writeRecipes(recipes);
-  }, [
-    recipeId,
-    isFavorite,
-    editor.title,
-    editor.description,
-    editor.tagsText,
-    editor.ingredientsText,
-    editor.instructionsText,
-    editor.photoUri,
-  ]);
+  }, [recipeId, isFavorite, editor]);
+
+  const onStartEdit = useCallback(() => {
+    setEditSnapshot(snapshotFromEditor(editor));
+    editor.setIsEditing(true);
+  }, [editor]);
+
+  const onCancelEdit = useCallback(() => {
+    editor.reset();
+    // snapshot the reset state (next tick so state is applied)
+    setTimeout(() => setEditSnapshot(snapshotFromEditor(editor)), 0);
+  }, [editor]);
+
+  const onSaveEdit = useCallback(async () => {
+    await editor.save();
+    setEditSnapshot(snapshotFromEditor(editor));
+    editor.setIsEditing(false);
+  }, [editor]);
+
   return (
     <>
       <Stack.Screen
         options={{
           title: "",
-          headerRight: () => (
-            <HeaderTextButton
-              label={editor.isEditing ? t("common.cancel") : t("common.edit")}
-              onPress={() =>
-                editor.isEditing ? editor.reset() : editor.setIsEditing(true)
-              }
-            />
-          ),
+
+          headerLeft: () =>
+            editor.isEditing && isDirty ? (
+              <HeaderPillButton
+                label={t("common.cancel") || "Cancel"}
+                onPress={onCancelEdit}
+              />
+            ) : (
+              <HeaderPillButton
+                label={t("common.back") || "Back"}
+                onPress={() => router.back()}
+              />
+            ),
+
+          headerRight: () =>
+            editor.isEditing ? (
+              isDirty ? (
+                <HeaderPillButton
+                  label={t("common.save") || "Save"}
+                  onPress={onSaveEdit}
+                />
+              ) : null
+            ) : (
+              <HeaderPillButton
+                label={t("common.edit") || "Edit"}
+                onPress={onStartEdit}
+              />
+            ),
         }}
       />
 
@@ -198,7 +249,7 @@ export default function RecipeInfo() {
           setIngredientsText={editor.setIngredientsText}
           instructionsText={editor.instructionsText}
           setInstructionsText={editor.setInstructionsText}
-          onSave={editor.save}
+          onSave={onSaveEdit}
           onDelete={editor.confirmDelete}
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}

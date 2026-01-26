@@ -8,16 +8,17 @@ import { Pressable, StyleSheet } from "react-native";
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text, View } from "@/components/Themed";
 
+import HeaderPillButton from "@/components/navigation/HeaderPillButton";
 import RecipeSearchBar, {
-    RecipeSearchScope,
+  RecipeSearchScope,
 } from "@/components/recipes/RecipeSearchBar";
 
 import {
-    DayMealPlan,
-    MealType,
-    PlannedRecipeRef,
-    readTodayMealPlan,
-    writeTodayMealPlan,
+  DayMealPlan,
+  MealType,
+  PlannedRecipeRef,
+  readTodayMealPlan,
+  writeTodayMealPlan,
 } from "@/utils/mealPlan/mealPlanStorage";
 
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
@@ -51,7 +52,7 @@ export default function MealPlanScreen() {
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
-  // ✅ saved vs draft
+  // saved vs draft
   const [savedPlan, setSavedPlan] = useState<DayMealPlan>({});
   const [draftPlan, setDraftPlan] = useState<DayMealPlan>({});
 
@@ -93,7 +94,7 @@ export default function MealPlanScreen() {
     [recipes, query, scope],
   );
 
-  // ✅ draft updates only
+  // draft updates only
   const onPickRecipe = useCallback(
     (recipe: Recipe) => {
       if (!activeSlot) return;
@@ -144,21 +145,26 @@ export default function MealPlanScreen() {
       <Stack.Screen
         options={{
           title: t("meals.planTitle") || "Meal plan",
-          headerRight: () =>
-            isDirty ? (
-              <Pressable onPress={onSaveChanges} hitSlop={10}>
-                <Text style={styles.headerBtn}>
-                  {t("common.save") || "Save"}
-                </Text>
-              </Pressable>
-            ) : null,
+
           headerLeft: () =>
             isDirty ? (
-              <Pressable onPress={onCancelChanges} hitSlop={10}>
-                <Text style={styles.headerBtn}>
-                  {t("common.cancel") || "Cancel"}
-                </Text>
-              </Pressable>
+              <HeaderPillButton
+                label={t("common.cancel") || "Cancel"}
+                onPress={onCancelChanges}
+              />
+            ) : (
+              <HeaderPillButton
+                label={t("common.back") || "Back"}
+                onPress={() => router.back()}
+              />
+            ),
+
+          headerRight: () =>
+            isDirty ? (
+              <HeaderPillButton
+                label={t("common.save") || "Save"}
+                onPress={onSaveChanges}
+              />
             ) : null,
         }}
       />

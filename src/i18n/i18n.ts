@@ -69,6 +69,7 @@ const resources = {
         open: "Open",
         swap: "Swap",
         clear: "Clear",
+        back: "Back",
       },
       home: {
         todaysMealPlan: "Today's meal plan",
@@ -152,6 +153,7 @@ const resources = {
         open: "Åbn",
         swap: "Byt",
         clear: "Ryd",
+        back: "Tilbage",
       },
       home: {
         todaysMealPlan: "Dagens måltidsplan",
