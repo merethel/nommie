@@ -1,10 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { Keyboard, Pressable, StyleSheet } from "react-native";
+import { Keyboard, StyleSheet, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
+import CookedPodium from "@/components/home/CookedPodium";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 import RecipeSearchBar from "@/components/recipes/RecipeSearchBar";
 import RecipeSortBar, {
@@ -12,12 +14,20 @@ import RecipeSortBar, {
 } from "@/components/recipes/RecipeSortBar";
 import { Text, View } from "@/components/Themed";
 
+import Colors from "@/constants/Colors";
 import { BOTTOM_NAV_HEIGHT, BOTTOM_NAV_MARGIN } from "@/constants/layout";
 import { RECIPES_KEY } from "@/constants/storageKeys";
 import { Recipe } from "@/src/types/recipe";
 import { syncTodayMealPlanRecipe } from "@/utils/mealPlan/mealPlanStorage";
+import {
+  getTopCookedRecipes,
+  TopCookedRecipe,
+} from "@/utils/recipes/getTopCookedRecipes";
 import { getCookedCount } from "@/utils/recipes/recipeCooked";
 import { filterRecipes } from "@/utils/recipes/searchRecipes";
+import { t } from "i18next";
+
+/* ---------------- helpers ---------------- */
 
 async function readRecipes(): Promise<Recipe[]> {
   const raw = await AsyncStorage.getItem(RECIPES_KEY);
@@ -33,11 +43,15 @@ async function writeRecipes(recipes: Recipe[]) {
   await AsyncStorage.setItem(RECIPES_KEY, JSON.stringify(recipes));
 }
 
+/* ---------------- screen ---------------- */
+
 export default function FavoritesScreen() {
   const insets = useSafeAreaInsets();
+  const c = Colors[useColorScheme() ?? "light"];
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [cookedMap, setCookedMap] = useState<Record<string, number>>({});
+  const [topCooked, setTopCooked] = useState<TopCookedRecipe[]>([]);
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<RecipeSortMode>("newest");
 
@@ -45,15 +59,17 @@ export default function FavoritesScreen() {
     const all = await readRecipes();
     setRecipes(all);
 
-    // cooked counts only for favorites
-    const favs = all.filter((r) => !!r.isFavorite);
+    // cooked counts (for sorting)
     const pairs = await Promise.all(
-      favs.map(async (r) => [r.id, await getCookedCount(r.id)] as const),
+      all.map(async (r) => [r.id, await getCookedCount(r.id)] as const),
     );
+    const map: Record<string, number> = {};
+    for (const [id, count] of pairs) map[id] = count;
+    setCookedMap(map);
 
-    const nextMap: Record<string, number> = {};
-    for (const [id, count] of pairs) nextMap[id] = count;
-    setCookedMap(nextMap);
+    // global podium (all-time)
+    const top = await getTopCookedRecipes(3);
+    setTopCooked(top);
   }, []);
 
   useFocusEffect(
@@ -67,7 +83,6 @@ export default function FavoritesScreen() {
     [recipes],
   );
 
-  // ✅ NO scope anymore
   const searched = useMemo(
     () => filterRecipes(favoritesOnly, query),
     [favoritesOnly, query],
@@ -133,63 +148,86 @@ export default function FavoritesScreen() {
   );
 
   const noFavoritesAtAll = favoritesOnly.length === 0;
-
-  if (noFavoritesAtAll) {
-    return (
-      <View style={styles.emptyWrap}>
-        <Text style={styles.emptyTitle}>No favorites yet</Text>
-        <Text style={styles.emptySub}>
-          Tap the heart on a recipe to save it here.
-        </Text>
-      </View>
-    );
-  }
+  const showPodium = topCooked.length > 0;
 
   return (
-    <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-      <ScrollViewContainer
-        contentContainerStyle={[
-          styles.container,
-          {
-            paddingBottom:
-              BOTTOM_NAV_HEIGHT + BOTTOM_NAV_MARGIN + insets.bottom,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="on-drag"
-      >
-        <RecipeSearchBar
-          query={query}
-          onChangeQuery={setQuery}
-          resultCount={sorted.length}
+    <ScrollViewContainer
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingBottom: BOTTOM_NAV_HEIGHT + BOTTOM_NAV_MARGIN + insets.bottom,
+        },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+      // optional: also dismiss when user starts scrolling
+      onScrollBeginDrag={Keyboard.dismiss}
+    >
+      {showPodium && (
+        <CookedPodium
+          items={topCooked}
+          title={t("recipes.mostCooked") || "Most cooked"}
+          onPressItem={(item) =>
+            router.push({
+              pathname: "/pages/recipes/recipeInfo",
+              params: { id: item.id },
+            })
+          }
         />
+      )}
 
-        {/* ✅ Reusable sort component */}
-        <RecipeSortBar value={sortMode} onChange={setSortMode} />
+      {/* separator*/}
+      <View
+        style={{
+          marginBottom: -20,
+        }}
+      />
 
-        {sorted.length === 0 ? (
-          <Text style={styles.helperText}>No matches.</Text>
-        ) : (
-          sorted.map((r) => (
-            <RecipeCard
-              key={r.id}
-              id={r.id}
-              title={r.title}
-              description={r.description}
-              tags={r.tags ?? []}
-              ingredients={r.ingredients ?? []}
-              instructions={r.instructions ?? []}
-              photoUri={r.photoUri}
-              isFavorite={!!r.isFavorite}
-              onToggleFavorite={toggleFavorite}
-              onAddToMealPlan={addToMealPlan}
+      {noFavoritesAtAll ? (
+        <View style={styles.emptyWrap}>
+          <Text style={styles.emptyTitle}>No favorites yet</Text>
+          <Text style={styles.emptySub}>
+            Tap the heart on a recipe to save it here.
+          </Text>
+        </View>
+      ) : (
+        <>
+          <View style={styles.searchWrap}>
+            <RecipeSearchBar
+              query={query}
+              onChangeQuery={setQuery}
+              resultCount={sorted.length}
             />
-          ))
-        )}
-      </ScrollViewContainer>
-    </Pressable>
+          </View>
+
+          <RecipeSortBar value={sortMode} onChange={setSortMode} />
+
+          {sorted.length === 0 ? (
+            <Text style={styles.helperText}>No matches.</Text>
+          ) : (
+            sorted.map((r) => (
+              <RecipeCard
+                key={r.id}
+                id={r.id}
+                title={r.title}
+                description={r.description}
+                tags={r.tags ?? []}
+                ingredients={r.ingredients ?? []}
+                instructions={r.instructions ?? []}
+                photoUri={r.photoUri}
+                isFavorite={!!r.isFavorite}
+                onToggleFavorite={toggleFavorite}
+                onAddToMealPlan={addToMealPlan}
+              />
+            ))
+          )}
+        </>
+      )}
+    </ScrollViewContainer>
   );
 }
+
+/* ---------------- styles ---------------- */
 
 const styles = StyleSheet.create({
   container: {
@@ -197,14 +235,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
+  // ✅ more margin above the search bar
+  searchWrap: {
+    marginTop: 12,
+  },
+
   emptyWrap: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    paddingVertical: 32,
   },
   emptyTitle: { fontSize: 18, fontWeight: "800" },
-  emptySub: { marginTop: 8, opacity: 0.7, textAlign: "center" },
+  emptySub: { opacity: 0.7, textAlign: "center" },
 
   helperText: {
     opacity: 0.7,

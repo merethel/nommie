@@ -4,6 +4,7 @@ import Colors from "@/constants/Colors";
 import { DEFAULT_RECIPE_IMAGE, PLAN_MEAL_IMAGE } from "@/constants/images";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { t } from "i18next";
 import React, {
   useCallback,
   useEffect,
@@ -39,9 +40,9 @@ type Props = {
 };
 
 function mealLabel(type: MealType) {
-  if (type === "breakfast") return "Breakfast";
-  if (type === "lunch") return "Lunch";
-  return "Dinner";
+  if (type === "breakfast") return t("mealTypes.breakfast");
+  if (type === "lunch") return t("mealTypes.lunch");
+  return t("mealTypes.dinner");
 }
 
 export default function TopHeroCarousel({ meals, height = 220 }: Props) {

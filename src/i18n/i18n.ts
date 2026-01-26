@@ -95,6 +95,11 @@ const resources = {
         pickingFor: "Picking for",
         todaysMealPlan: "See today's meal plan",
       },
+      mealTypes: {
+        breakfast: "Breakfast",
+        lunch: "Lunch",
+        dinner: "Dinner",
+      },
     },
   },
   da: {
@@ -185,6 +190,11 @@ const resources = {
         dinner: "Aftensmad",
         planTitle: "Måltidsplan",
         todaysMealPlan: "Se dagens måltidsplan",
+      },
+      mealTypes: {
+        breakfast: "Morgenmad",
+        lunch: "Frokost",
+        dinner: "Aftensmad",
       },
     },
   },
