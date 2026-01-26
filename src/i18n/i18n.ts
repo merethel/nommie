@@ -59,6 +59,7 @@ const resources = {
         manyResults: "results",
         turnOnFilter: "Turn on at least one filter to search.",
         cookedCount: "Times cooked",
+        mostCooked: "Most cooked",
       },
       common: {
         showMore: "Show more",
@@ -149,6 +150,7 @@ const resources = {
         manyResults: "resultater",
         turnOnFilter: "Tænd for mindst ét filter for at søge.",
         cookedCount: "Antal gange lavet",
+        mostCooked: "Mest lavede opskrifter",
       },
       common: {
         showMore: "Vis mere",

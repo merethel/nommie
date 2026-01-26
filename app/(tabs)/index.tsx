@@ -7,10 +7,16 @@ import { useTranslation } from "react-i18next";
 import { StyleSheet, useColorScheme } from "react-native";
 
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
+import CookedPodium from "@/components/home/CookedPodium";
 import QuickActionsRow from "@/components/home/QuickActionsRow";
 import TopHeroCarousel from "@/components/home/TopHeroCarousel";
+
 import Colors from "@/constants/Colors";
 import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
+import {
+  getTopCookedRecipes,
+  TopCookedRecipe,
+} from "@/utils/recipes/getTopCookedRecipes";
 
 type MealSlot = {
   type: MealType;
@@ -19,21 +25,28 @@ type MealSlot = {
 
 export default function TabOneScreen() {
   const { t } = useTranslation();
+
   const [meals, setMeals] = useState<MealSlot[]>([
     { type: "breakfast" },
     { type: "lunch" },
     { type: "dinner" },
   ]);
 
+  const [topCooked, setTopCooked] = useState<TopCookedRecipe[]>([]);
+
   const c = Colors[useColorScheme() ?? "light"];
 
   const loadToday = useCallback(async () => {
     const plan = await readTodayMealPlan();
+
     setMeals([
       { type: "breakfast", recipe: plan.breakfast ?? undefined },
       { type: "lunch", recipe: plan.lunch ?? undefined },
       { type: "dinner", recipe: plan.dinner ?? undefined },
     ]);
+
+    const top = await getTopCookedRecipes(3);
+    setTopCooked(top);
   }, []);
 
   useFocusEffect(
@@ -48,9 +61,11 @@ export default function TabOneScreen() {
       contentContainerStyle={{ paddingTop: 0, marginTop: 0 }}
     >
       <Stack.Screen />
+
       <View style={{ flex: 1, marginHorizontal: -16 }}>
         <TopHeroCarousel meals={meals} height={240} />
       </View>
+
       <View style={styles.editPlanWrap}>
         <StyledButton
           title={t("meals.todaysMealPlan") || "Edit meal plan"}
@@ -58,7 +73,15 @@ export default function TabOneScreen() {
           style={[styles.editPlanButton, { backgroundColor: c.card }]}
         />
       </View>
+
       <QuickActionsRow />
+
+      {topCooked.length > 0 && (
+        <CookedPodium
+          items={topCooked}
+          title={t("recipes.mostCooked") || "Most cooked"}
+        />
+      )}
     </ScrollViewContainer>
   );
 }
