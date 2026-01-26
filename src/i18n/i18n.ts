@@ -39,6 +39,7 @@ const resources = {
         home: "Home",
         recipes: "Cookbook",
         settings: "Settings",
+        mealPlan: "Meal Plan",
       },
       notFound: {
         title: "This screen doesn't exist.",
@@ -94,6 +95,7 @@ const resources = {
         pickRecipe: "Pick a recipe",
         pickingFor: "Picking for",
         todaysMealPlan: "See today's meal plan",
+        calendar: "Calendar",
       },
       mealTypes: {
         breakfast: "Breakfast",
@@ -138,6 +140,7 @@ const resources = {
         home: "Hjem",
         recipes: "Kogebog",
         settings: "Indstillinger",
+        mealPlan: "Måltidsplan",
       },
       notFound: {
         title: "Denne skærm findes ikke.",
@@ -190,6 +193,10 @@ const resources = {
         dinner: "Aftensmad",
         planTitle: "Måltidsplan",
         todaysMealPlan: "Se dagens måltidsplan",
+        chooseRecipe: "Vælg opskrift",
+        pickRecipe: "Vælg en opskrift",
+        pickingFor: "Vælger til",
+        calendar: "Kalender",
       },
       mealTypes: {
         breakfast: "Morgenmad",

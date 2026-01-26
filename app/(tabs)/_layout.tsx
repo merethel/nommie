@@ -51,9 +51,7 @@ export default function TabLayout() {
         name="two"
         options={{
           title: t("tabs.recipes"),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="cutlery" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
       />
 
@@ -72,6 +70,15 @@ export default function TabLayout() {
         }}
       />
 
+      <Tabs.Screen
+        name="mealPlan"
+        options={{
+          title: t("tabs.mealPlan"),
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="cutlery" color={color} />
+          ),
+        }}
+      />
       <Tabs.Screen
         name="settings"
         options={{
