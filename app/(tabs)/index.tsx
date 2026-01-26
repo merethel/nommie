@@ -1,46 +1,68 @@
-import { StyleSheet } from "react-native";
-
-import ScreenContainer from "@/components/common/ScreenConatiner";
 import StyledButton from "@/components/common/StyledButton";
 import { Text, View } from "@/components/Themed";
+import { useFocusEffect } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { StyleSheet } from "react-native";
+
+import ScrollViewContainer from "@/components/common/ScrollViewContainer";
+import TodaysMealPlan from "@/components/home/TodaysMealPlan";
+import { MealType, readTodayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
+
+type MealSlot = {
+  type: MealType;
+  recipe?: { id: string; title: string };
+};
 
 export default function TabOneScreen() {
   const { t } = useTranslation();
+  const [meals, setMeals] = useState<MealSlot[]>([
+    { type: "breakfast" },
+    { type: "lunch" },
+    { type: "dinner" },
+  ]);
+
+  const loadToday = useCallback(async () => {
+    const plan = await readTodayMealPlan();
+    setMeals([
+      { type: "breakfast", recipe: plan.breakfast ?? undefined },
+      { type: "lunch", recipe: plan.lunch ?? undefined },
+      { type: "dinner", recipe: plan.dinner ?? undefined },
+    ]);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadToday();
+    }, [loadToday]),
+  );
 
   return (
-    <ScreenContainer>
+    <ScrollViewContainer>
       <Stack.Screen options={{ title: t("tabs.home") }} />
-      <Text style={styles.title}>{t("tabs.home")}</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <View>
+
+      <Text style={styles.title}>{t("home.today") || "Today"}</Text>
+
+      <TodaysMealPlan meals={meals} />
+
+      <View style={styles.actionsBlock}>
         <StyledButton
           title={t("createRecipe.screenTitle")}
           onPress={() => router.push("../pages/recipes/createRecipe")}
         />
       </View>
-    </ScreenContainer>
+    </ScrollViewContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   title: {
-    fontSize: 20,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800",
+    marginBottom: 12,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
+  actionsBlock: {
+    marginTop: 24,
   },
 });

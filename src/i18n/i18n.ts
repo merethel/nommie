@@ -37,7 +37,7 @@ const resources = {
       },
       tabs: {
         home: "Home",
-        recipes: "Recipes",
+        recipes: "Cookbook",
         settings: "Settings",
       },
       notFound: {
@@ -66,6 +66,22 @@ const resources = {
         delete: "Delete",
         cancel: "Cancel",
         save: "Save",
+        open: "Open",
+        swap: "Swap",
+        clear: "Clear",
+      },
+      home: {
+        today: "Today",
+      },
+      meals: {
+        breakfast: "Breakfast",
+        lunch: "Lunch",
+        dinner: "Dinner",
+        planMeal: "Plan meal",
+        planTitle: "Meal plan",
+        chooseRecipe: "Choose recipe",
+        pickRecipe: "Pick a recipe",
+        pickingFor: "Picking for",
       },
     },
   },
@@ -103,7 +119,7 @@ const resources = {
       },
       tabs: {
         home: "Hjem",
-        recipes: "Opskrifter",
+        recipes: "Kogebog",
         settings: "Indstillinger",
       },
       notFound: {
@@ -132,6 +148,22 @@ const resources = {
         delete: "Slet",
         cancel: "Annuller",
         save: "Gem",
+        open: "Åbn",
+        swap: "Byt",
+        clear: "Ryd",
+      },
+      home: {
+        today: "I dag",
+      },
+      meals: {
+        planMeal: "Planlæg måltid",
+        breakfast: "Morgenmad",
+        lunch: "Frokost",
+        dinner: "Aftensmad",
+        planTitle: "Måltidsplan",
+        chooseRecipe: "Vælg opskrift",
+        pickRecipe: "Vælg en opskrift",
+        pickingFor: "Vælger for",
       },
     },
   },
