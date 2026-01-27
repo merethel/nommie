@@ -11,6 +11,7 @@ import { Text, View } from "@/components/Themed";
 import MealPlanEditor from "@/components/mealPlan/MealPlanEditor";
 import WeekOverviewStrip from "@/components/mealPlan/WeekOverviewStrip";
 
+import { BOTTOM_NAV_HEIGHT, BOTTOM_NAV_MARGIN } from "@/constants/layout";
 import {
   DayMealPlan,
   readMealPlanDay,
@@ -59,7 +60,10 @@ export default function MealPlanTab() {
     <ScrollViewContainer
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[
+        styles.container,
+        { paddingBottom: BOTTOM_NAV_HEIGHT + BOTTOM_NAV_MARGIN + 12 },
+      ]}
     >
       <Stack.Screen options={{ headerShown: false }} />
 
@@ -69,7 +73,6 @@ export default function MealPlanTab() {
           <Text style={styles.title}>
             {t("meals.planTitle") || "Meal plan"}
           </Text>
-          <Text style={styles.sub}>{t("meals.today") || "Today"}</Text>
         </View>
 
         <View style={{ flexDirection: "row", gap: 8 }}>
@@ -82,7 +85,7 @@ export default function MealPlanTab() {
 
       {/* TODAY */}
       <View style={{ gap: 10 }}>
-        <Text style={styles.sectionTitle}>Today</Text>
+        <Text style={styles.sectionTitle}>{t("meals.today") || "Today"}</Text>
         <MealPlanEditor dateKey={today} />
       </View>
 
@@ -104,6 +107,7 @@ const styles = StyleSheet.create({
   container: { padding: 16, paddingTop: 12, paddingBottom: 24, gap: 16 },
 
   topRow: {
+    marginTop: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

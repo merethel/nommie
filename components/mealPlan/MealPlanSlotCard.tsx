@@ -7,6 +7,7 @@ import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { DEFAULT_RECIPE_IMAGE } from "@/constants/images";
 import { PlannedRecipeRef } from "@/utils/mealPlan/mealPlanStorage";
+import { t } from "i18next";
 
 export default function MealPlanSlotCard({
   icon,
@@ -39,8 +40,8 @@ export default function MealPlanSlotCard({
         },
       ]}
     >
-      <View style={styles.topRow}>
-        <View style={styles.labelRow}>
+      <View style={[styles.topRow, { backgroundColor: c.card }]}>
+        <View style={[styles.labelRow, { backgroundColor: c.card }]}>
           <Ionicons name={icon} size={16} color={c.muted} />
           <Text style={styles.label}>{label}</Text>
         </View>
@@ -75,7 +76,7 @@ export default function MealPlanSlotCard({
         )}
       </View>
 
-      <View style={styles.bodyRow}>
+      <View style={[styles.bodyRow, { backgroundColor: c.card }]}>
         <Image
           source={
             recipe?.photoUri ? { uri: recipe.photoUri } : DEFAULT_RECIPE_IMAGE
@@ -83,9 +84,11 @@ export default function MealPlanSlotCard({
           style={styles.thumb}
         />
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: c.card }}>
           <Text style={styles.title} numberOfLines={2}>
-            {recipe?.title ? recipe.title : "Choose recipe"}
+            {recipe?.title
+              ? recipe.title
+              : t("meals.chooseRecipe") || "Choose a recipe"}
           </Text>
           {!!hint && (
             <Text style={[styles.hint, { color: c.muted }]} numberOfLines={1}>

@@ -6,6 +6,7 @@ import { Text, View } from "@/components/Themed";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@/constants/Colors";
 import { DayMealPlan } from "@/utils/mealPlan/mealPlanStorage";
+import { t } from "i18next";
 
 type WeekDayItem = {
   dateKey: string; // YYYY-MM-DD
@@ -34,7 +35,7 @@ export default function WeekOverviewStrip({
   return (
     <View style={styles.wrap}>
       <View style={styles.headerRow}>
-        <Text style={styles.hTitle}>This week</Text>
+        <Text style={styles.hTitle}>{t("meals.thisWeek") || "This week"}</Text>
         <Text style={[styles.hSub, { color: c.muted }]}>
           {plannedCount} / 7 days planned
         </Text>
@@ -67,7 +68,18 @@ export default function WeekOverviewStrip({
                   : null,
               ]}
             >
-              <View style={styles.left}>
+              <View
+                style={[
+                  styles.left,
+                  {
+                    backgroundColor: d.isToday
+                      ? scheme === "dark"
+                        ? "rgba(242,184,75,0.05)"
+                        : "rgba(242,184,75,0.03)"
+                      : "transparent",
+                  },
+                ]}
+              >
                 <Text
                   style={[
                     styles.dayLabel,
@@ -81,7 +93,18 @@ export default function WeekOverviewStrip({
                 </Text>
               </View>
 
-              <View style={styles.meals}>
+              <View
+                style={[
+                  styles.meals,
+                  {
+                    backgroundColor: d.isToday
+                      ? scheme === "dark"
+                        ? "rgba(242,184,75,0.05)"
+                        : "rgba(242,184,75,0.03)"
+                      : "transparent",
+                  },
+                ]}
+              >
                 <MealDot label="B" filled={!!b} />
                 <MealDot label="L" filled={!!l} />
                 <MealDot label="D" filled={!!di} />

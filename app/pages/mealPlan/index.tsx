@@ -8,8 +8,8 @@ import { Calendar } from "react-native-calendars";
 import ScrollViewContainer from "@/components/common/ScrollViewContainer";
 import { Text, View } from "@/components/Themed";
 import {
-    readMealPlansByDate,
-    todayKey,
+  readMealPlansByDate,
+  todayKey,
 } from "@/utils/mealPlan/mealPlanStorage";
 
 export default function MealPlanCalendarPage() {
@@ -49,7 +49,6 @@ export default function MealPlanCalendarPage() {
       <Stack.Screen options={{ title: t("meals.calendar") || "Calendar" }} />
 
       <View style={styles.header}>
-        <Text style={styles.title}>{t("meals.calendar") || "Calendar"}</Text>
         <Text style={styles.sub}>
           {t("meals.tapDayToEdit") || "Tap a day to edit meal plan"}
         </Text>
@@ -74,7 +73,7 @@ const styles = StyleSheet.create({
   container: { padding: 16, paddingTop: 12, paddingBottom: 24 },
   header: { marginBottom: 12 },
   title: { fontSize: 22, fontWeight: "800" },
-  sub: { opacity: 0.7, marginTop: 6 },
+  sub: { opacity: 0.7, marginTop: 50 },
   calendarWrap: {
     borderWidth: 1,
     borderColor: "#ddd",

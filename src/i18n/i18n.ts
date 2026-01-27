@@ -96,6 +96,9 @@ const resources = {
         pickingFor: "Picking for",
         todaysMealPlan: "See today's meal plan",
         calendar: "Calendar",
+        today: "Today",
+        thisWeek: "This week",
+        tapDayToEdit: "Tap a day to edit meal plan",
       },
       mealTypes: {
         breakfast: "Breakfast",
@@ -197,6 +200,9 @@ const resources = {
         pickRecipe: "Vælg en opskrift",
         pickingFor: "Vælger til",
         calendar: "Kalender",
+        today: "I dag",
+        thisWeek: "Denne uge",
+        tapDayToEdit: "Tryk på en dag for at redigere måltidsplanen",
       },
       mealTypes: {
         breakfast: "Morgenmad",
