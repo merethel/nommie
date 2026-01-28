@@ -93,10 +93,7 @@ export default function CustomTabBar({
   const blurTint = scheme === "dark" ? "dark" : "light";
 
   return (
-    <View
-      style={[styles.wrap, { paddingBottom: insets.bottom }]}
-      pointerEvents="box-none"
-    >
+    <View style={[styles.wrap]} pointerEvents="box-none">
       <View style={[styles.container, { width: barWidth, height: BAR_HEIGHT }]}>
         {/* Blur + border + notch cutout */}
         <MaskedView
@@ -255,10 +252,8 @@ function TabButton({
 
 const styles = StyleSheet.create({
   wrap: {
-    position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
     alignItems: "center",
   },
   container: {
