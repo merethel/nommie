@@ -19,7 +19,7 @@ import {
 
 /* ───────────────────────── constants ───────────────────────── */
 
-const BAR_HEIGHT = 64;
+const BAR_HEIGHT = 84;
 
 const NOTCH_DEPTH = 50;
 const MAX_NOTCH_WIDTH = 120;
@@ -94,7 +94,12 @@ export default function CustomTabBar({
 
   return (
     <View style={[styles.wrap]} pointerEvents="box-none">
-      <View style={[styles.container, { width: barWidth, height: BAR_HEIGHT }]}>
+      <View
+        style={[
+          styles.container,
+          { width: barWidth, height: BAR_HEIGHT, paddingBottom: insets.bottom },
+        ]}
+      >
         {/* Blur + border + notch cutout */}
         <MaskedView
           style={styles.barShell}
