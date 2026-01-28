@@ -97,7 +97,11 @@ export default function CustomTabBar({
       <View
         style={[
           styles.container,
-          { width: barWidth, height: BAR_HEIGHT, paddingBottom: insets.bottom },
+          {
+            width: barWidth,
+            height: BAR_HEIGHT,
+            paddingBottom: insets.bottom - 15,
+          },
         ]}
       >
         {/* Blur + border + notch cutout */}
@@ -257,8 +261,10 @@ function TabButton({
 
 const styles = StyleSheet.create({
   wrap: {
+    position: "absolute",
     left: 0,
     right: 0,
+    bottom: 0,
     alignItems: "center",
   },
   container: {
