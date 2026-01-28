@@ -40,8 +40,16 @@ export default function CreateRecipeScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   async function pickImage() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    // iOS can be "granted" or not granted; user may also choose limited access.
+    if (!perm.granted) {
+      alert("Please allow photo access in Settings to pick an image.");
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "Images" as any,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
