@@ -5,6 +5,7 @@ import { Stack, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Image,
+  Keyboard,
   Pressable,
   StyleSheet,
   TextInput,
@@ -40,22 +41,25 @@ export default function CreateRecipeScreen() {
   const [photoUri, setPhotoUri] = useState<string | null>(null);
 
   async function pickImage() {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    Keyboard.dismiss();
 
-    // iOS can be "granted" or not granted; user may also choose limited access.
+    // Only request if not already granted
+    const perm = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      alert("Please allow photo access in Settings to pick an image.");
-      return;
+      const req = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!req.granted) {
+        alert("Please allow photo access in Settings to pick an image.");
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "Images" as any,
-      allowsEditing: true,
-      aspect: [4, 3],
+      mediaTypes: ["images"],
+      allowsEditing: false,
       quality: 0.8,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets?.[0]?.uri) {
       setPhotoUri(result.assets[0].uri);
     }
   }

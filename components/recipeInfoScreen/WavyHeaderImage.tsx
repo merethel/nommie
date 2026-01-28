@@ -8,6 +8,7 @@ import React, { useMemo } from "react";
 import {
   Dimensions,
   Image,
+  Keyboard,
   Pressable,
   View as RNView,
   StyleSheet,
@@ -35,20 +36,24 @@ export default function WavyHeaderImage({
   const c = Colors[scheme];
 
   async function pickImage() {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    Keyboard.dismiss();
+
+    const perm = await ImagePicker.getMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      alert("Please allow photo access in Settings to pick an image.");
-      return;
+      const req = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!req.granted) {
+        alert("Please allow photo access in Settings to pick an image.");
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: "Images" as any, // because your expo-image-picker doesn't have ImagePicker.MediaType
-      allowsEditing: true,
-      aspect: [4, 3],
+      mediaTypes: ["images"],
+      allowsEditing: false,
       quality: 0.8,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled && result.assets?.[0]?.uri) {
       onChangePhotoUri(result.assets[0].uri);
     }
   }
